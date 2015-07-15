@@ -3,6 +3,7 @@ package com.almondtools.xrayinterface;
 import static com.almondtools.xrayinterface.Converter.convertArguments;
 import static com.almondtools.xrayinterface.Converter.convertResult;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,16 +13,16 @@ import java.lang.reflect.Method;
  */
 public class ConstructorInvoker implements StaticMethodInvocationHandler {
 
-	private Constructor<?> constructor;
-	private Method target;
+	private MethodHandle constructor;
+	private Class<?>[] targetParameterTypes;
+	private Class<?> targetReturnType;
 
 	/**
 	 * Invokes the given constructor
 	 * @param constructor the constructor to invoke
 	 */
-	public ConstructorInvoker(Constructor<?> constructor) {
+	public ConstructorInvoker(MethodHandle constructor) {
 		this.constructor = constructor;
-		constructor.setAccessible(true);
 	}
 
 	/**
@@ -29,44 +30,35 @@ public class ConstructorInvoker implements StaticMethodInvocationHandler {
 	 * @param target the target signature (source arguments, target result)
 	 * @see Convert 
 	 */
-	public ConstructorInvoker(Constructor<?> constructor, Method target) {
+	public ConstructorInvoker(MethodHandle constructor, Method target) {
 		this(constructor);
-		this.target = target;
-	}
-
-	/**
-	 * Invokes the default constructor (with no arguments)
-	 * @param constructor the constructor to invoke
-	 */
-	public ConstructorInvoker(Class<?> clazz) throws NoSuchMethodException {
-		this(defaultConstructor(clazz));
-	}
-
-	private static Constructor<?> defaultConstructor(Class<?> clazz) throws NoSuchMethodException {
-		return clazz.getDeclaredConstructor(new Class[0]);
+		if (target != null) {
+			this.targetReturnType = target.getReturnType();
+			this.targetParameterTypes = target.getParameterTypes();
+		}
 	}
 
 	@Override
 	public Object invoke(Object... args) throws Throwable {
 		try {
-			return r(constructor.newInstance(a(args)));
+			return r(constructor.invokeWithArguments(a(args)));
 		} catch (InvocationTargetException e) {
 			throw e.getTargetException();
 		}
 	}
 
 	private Object[] a(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		if (target == null) {
+		if (targetParameterTypes == null || targetParameterTypes.length == 0) {
 			return args;
 		}
-		return convertArguments(target.getParameterTypes(), constructor.getParameterTypes(), args);
+		return convertArguments(targetParameterTypes, constructor.type().parameterArray(), args);
 	}
 
 	private Object r(Object result) throws NoSuchMethodException {
-		if (target == null) {
+		if (targetReturnType == null) {
 			return result;
 		}
-		return convertResult(target.getReturnType(), constructor.getDeclaringClass(), result);
+		return convertResult(targetReturnType, constructor.type().returnType(), result);
 	}
 
 }

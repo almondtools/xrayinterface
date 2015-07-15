@@ -1,8 +1,8 @@
 package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.Converter.convertArgument;
-import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
@@ -11,29 +11,26 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class FieldSetter implements MethodInvocationHandler {
 
-	private Field field;
+	private MethodHandle setter;
 	private Class<?> target;
 
 	/**
 	 * Sets a value on the given field.
-	 * @param field the field to access
+	 * @param setter the setter method handle for the field to access
 	 */
-	public FieldSetter(Field field) {
-		this.field = field;
-		field.setAccessible(true);
-		ensureNonFinal(field);
+	public FieldSetter(MethodHandle setter) {
+		this.setter = setter;
 	}
 	
 	/**
 	 * Sets a value on the given field. Beyond {@link #FieldSetter(Field)} this constructor also converts the argument
-	 * @param field the field to access
+	 * @param setter the setter method handle for the field to access
 	 * @param target the target signature (source arguments)
 	 * @see Convert 
 	 */
-	public FieldSetter(Field field, Class<?> target) {
-		this(field);
+	public FieldSetter(MethodHandle setter, Class<?> target) {
+		this(setter);
 		this.target = target;
-		ensureNonFinal(field);
 	}
 
 	@Override
@@ -42,10 +39,10 @@ public class FieldSetter implements MethodInvocationHandler {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}
 		Object arg = a(args[0]);
-		if (arg != null && !BoxingUtil.getBoxed(field.getType()).isInstance(arg)) {
-			throw new ClassCastException("defined type of " + field.getName() + " is " + arg.getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
+		if (arg != null && !BoxingUtil.getBoxed(setter.type().parameterType(1)).isInstance(arg)) {
+			throw new ClassCastException("defined type of field is " + arg.getClass().getSimpleName() + ", but assigned type was " + setter.type().parameterType(1).getSimpleName());
 		}
-		field.set(object, arg);
+		setter.invoke(object, arg);
 		return null;
 	}
 
@@ -53,7 +50,7 @@ public class FieldSetter implements MethodInvocationHandler {
 		if (target == null) {
 			return arg;
 		}
-		return convertArgument(target, field.getType(), arg);
+		return convertArgument(target, setter.type().parameterType(1), arg);
 	}
 
 }

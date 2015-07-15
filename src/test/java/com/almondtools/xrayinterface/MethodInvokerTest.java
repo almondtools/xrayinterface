@@ -4,8 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.almondtools.xrayinterface.MethodInvoker;
@@ -13,60 +18,77 @@ import com.almondtools.xrayinterface.MethodInvoker;
 @SuppressWarnings("unused")
 public class MethodInvokerTest {
 
+	private Lookup lookup;
+
+	@Before
+	public void before() throws Exception {
+		this.lookup = MethodHandles.lookup();
+	}
+
+	private MethodHandle methodOf(Class<?> clazz, String method, Class<?>... parameters) throws IllegalAccessException, NoSuchMethodException {
+		Method declaredMethod = clazz.getDeclaredMethod(method, parameters);
+		return methodOf(declaredMethod);
+	}
+
+	private MethodHandle methodOf(Method method) throws IllegalAccessException {
+		method.setAccessible(true);
+		return lookup.unreflect(method);
+	}
+
 	@Test
 	public void testInvoke() throws Throwable {
 		WithMethod object = new WithMethod();
-		Object invoke = new MethodInvoker(WithMethod.class.getDeclaredMethod("staticMethod", int.class)).invoke(object, new Object[] { 1 });
+		Object invoke = new MethodInvoker(methodOf(WithMethod.class,"staticMethod", int.class)).invoke(object, new Object[] { 1 });
 		assertThat((String) invoke, equalTo("1"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ClassCastException.class)
 	public void testInvokeFailingSignature() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(WithMethod.class.getDeclaredMethod("staticMethod", int.class)).invoke(object, new Object[] { "1" });
+		new MethodInvoker(methodOf(WithMethod.class,"staticMethod", int.class)).invoke(object, new Object[] { "1" });
 	}
 
 	@Test(expected = IOException.class)
 	public void testInvokeCheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(WithMethod.class.getDeclaredMethod("staticException", int.class)).invoke(object, new Object[] { 2 });
+		new MethodInvoker(methodOf(WithMethod.class,"staticException", int.class)).invoke(object, new Object[] { 2 });
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testInvokeUncheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(WithMethod.class.getDeclaredMethod("staticException", int.class)).invoke(object, new Object[] { 1 });
+		new MethodInvoker(methodOf(WithMethod.class,"staticException", int.class)).invoke(object, new Object[] { 1 });
 	}
 
 	@Test
 	public void testConvertedInvoke() throws Throwable {
 		WithMethod object = new WithMethod();
-		Object invoke = new MethodInvoker(staticMethod(), staticMethod()).invoke(object, new Object[] { 1 });
+		Object invoke = new MethodInvoker(methodOf(staticMethod()), staticMethod()).invoke(object, new Object[] { 1 });
 		assertThat((String) invoke, equalTo("1"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ClassCastException.class)
 	public void testConvertedInvokeFailingSignature() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(staticMethod(), staticMethod()).invoke(object, new Object[] { "1" });
+		new MethodInvoker(methodOf(staticMethod()), staticMethod()).invoke(object, new Object[] { "1" });
 	}
 
 	@Test(expected = IOException.class)
 	public void testConvertedInvokeCheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(staticException(), staticException()).invoke(object, new Object[] { 2 });
+		new MethodInvoker(methodOf(staticException()), staticException()).invoke(object, new Object[] { 2 });
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testConvertedInvokeUncheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(staticException(), staticException()).invoke(object, new Object[] { 1 });
+		new MethodInvoker(methodOf(staticException()), staticException()).invoke(object, new Object[] { 1 });
 	}
 
 	@Test
 	public void testInvokeWithDifferentMethods() throws Throwable {
 		ForSimpleObject object = new ForSimpleObject();
-		Object invoke = new MethodInvoker(staticLongMethod(), interfaceLongMethod()).invoke(object, new Object[] { 1l, "2" });
+		Object invoke = new MethodInvoker(methodOf(staticLongMethod()), interfaceLongMethod()).invoke(object, new Object[] { 1l, "2" });
 		assertThat((Integer) invoke, equalTo(3));
 	}
 

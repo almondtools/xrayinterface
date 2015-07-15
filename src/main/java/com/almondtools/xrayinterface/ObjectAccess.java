@@ -84,8 +84,7 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	/**
 	 * wraps the given object. The result of this method will be decoratable with the new interface
 	 * 
-	 * @param type
-	 *            the class to unlock/decorate
+	 * @param type the class to unlock/decorate
 	 * @return the wrapped object
 	 */
 	public static ObjectAccess xray(Object object) {
@@ -97,8 +96,7 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	 * could be target of a mapping from a specific interface. Note that a class (not an object) is wrapped, but the result will check the instance interface of this class
 	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link com.almondtools.xrayinterface.ClassAccess#check(Class<?>)}.
 	 * 
-	 * @param type
-	 *            the target class to check
+	 * @param type the target class to check
 	 * @return the wrapped class
 	 */
 	public static ObjectSnoop check(Class<?> clazz) {
@@ -108,11 +106,9 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	/**
 	 * maps the given interface to the wrapped object
 	 * 
-	 * @param interfaceClass
-	 *            the given interface class (defining the type of the result)
+	 * @param interfaceClass the given interface class (defining the type of the result)
 	 * @return an object of the type of interfaceClass (mapped to the members of the wrapped object)
-	 * @throws NoSuchMethodException
-	 *             if a method of the interface class could not be mapped according to the upper rules
+	 * @throws NoSuchMethodException if a method of the interface class could not be mapped according to the upper rules
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T to(Class<T> interfaceClass) {

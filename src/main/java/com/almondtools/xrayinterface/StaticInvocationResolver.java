@@ -2,6 +2,7 @@ package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.Converter.determineNeededConversions;
 import static com.almondtools.xrayinterface.Converter.isConverted;
+import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.findTargetTypeName;
 import static com.almondtools.xrayinterface.SignatureUtil.isBooleanGetter;
@@ -14,8 +15,11 @@ import static com.almondtools.xrayinterface.SignatureUtil.methodSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyAnnotationsOf;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyOf;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyTypeOf;
+import static java.lang.reflect.Modifier.isStatic;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,11 +30,13 @@ import java.util.Map;
 
 public class StaticInvocationResolver {
 
+	private MethodHandles.Lookup lookup;
 	private Map<String, Field> fieldCache;
 	private Class<?> type;
 
 	public StaticInvocationResolver(Class<?> type) {
 		this.type = type;
+		this.lookup = MethodHandles.lookup();
 		this.fieldCache = new HashMap<String, Field>();
 	}
 	
@@ -59,7 +65,12 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createConstructorInvocator(Method method) throws NoSuchMethodException {
-		return new ConstructorInvoker(findConstructor(method, type), findConversionTarget(method));
+		try {
+			Constructor<?> constructor = findConstructor(method, type);
+			return new ConstructorInvoker(lookup.unreflectConstructor(constructor), findConversionTarget(method));
+		} catch (IllegalAccessException e) {
+			throw new NoSuchMethodException("constructor " + method.getDeclaringClass().getSimpleName() + " is not accesible.");
+		}
 	}
 
 	private Constructor<?> findConstructor(Method method, Class<?> clazz) throws NoSuchMethodException {
@@ -75,6 +86,7 @@ public class StaticInvocationResolver {
 		String convertResult = findTargetTypeName(method.getAnnotations(), method.getReturnType());
 		for (Constructor<?> candidate : clazz.getDeclaredConstructors()) {
 			if (matchesSignature(method, candidate, convertArguments, convertResult)) {
+				candidate.setAccessible(true);
 				return candidate;
 			}
 		}
@@ -84,6 +96,7 @@ public class StaticInvocationResolver {
 	private Constructor<?> findMatchingConstructor(Method method, Class<?> clazz) throws NoSuchMethodException {
 		for (Constructor<?> candidate : clazz.getDeclaredConstructors()) {
 			if (matchesSignature(method, candidate, null, null)) {
+				candidate.setAccessible(true);
 				return candidate;
 			}
 		}
@@ -91,11 +104,41 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		return new StaticGetter(type, findField(method), convertedPropertyTypeOf(method));
+		Field field = findField(method);
+		return createGetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	}
+
+	private StaticMethodInvocationHandler createGetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+		try {
+			MethodHandle getter = lookup.unreflectGetter(field);
+			if (isStatic ) {
+				return new StaticGetter(getter, convertedPropertyType);
+			} else {
+				throw new NoSuchFieldException(field.getName() + " is not static.");
+			}
+		} catch (IllegalAccessException e) {
+			throw new NoSuchFieldException("field " + field.getName() + " is not accessible. Check your security manager.");
+		}
 	}
 
 	protected StaticMethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		return new StaticSetter(type, findField(method), convertedPropertyTypeOf(method));
+		Field field = findField(method);
+		ensureNonFinal(field);
+		
+		return createSetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	}
+
+	private StaticMethodInvocationHandler createSetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+		try {
+			MethodHandle setter = lookup.unreflectSetter(field);
+			if (isStatic ) {
+				return new StaticSetter(setter, convertedPropertyType);
+			} else {
+				throw new NoSuchFieldException(field.getName() + " is not static.");
+			}
+		} catch (IllegalAccessException e) {
+			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
+		}
 	}
 
 	private Class<?> convertedPropertyTypeOf(Method method) {
@@ -123,6 +166,7 @@ public class StaticInvocationResolver {
 					Field field = fieldCache.get(fieldName);
 					if (field == null) {
 						field = currentClass.getDeclaredField(fieldName);
+						field.setAccessible(true);
 						fieldCache.put(fieldName, field);
 					}
 					if (isCompliant(type, field.getType(), convert)) {
@@ -141,8 +185,8 @@ public class StaticInvocationResolver {
 		while (currentClass != Object.class) {
 			try {
 				Method candidate = findMethod(method, currentClass);
-				return new StaticMethodInvoker(currentClass, candidate, findConversionTarget(method));
-			} catch (NoSuchMethodException e) {
+				return new StaticMethodInvoker(lookup.unreflect(candidate), findConversionTarget(method));
+			} catch (NoSuchMethodException | IllegalAccessException e) {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
@@ -170,6 +214,7 @@ public class StaticInvocationResolver {
 		String convertResult = findTargetTypeName(method.getAnnotations(), method.getReturnType());
 		for (Method candidate : clazz.getDeclaredMethods()) {
 			if (matchesSignature(method, candidate, convertArguments, convertResult)) {
+				candidate.setAccessible(true);
 				return candidate;
 			}
 		}
@@ -179,6 +224,7 @@ public class StaticInvocationResolver {
 	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
 		Method candidate = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 		if (matchesSignature(method, candidate, null, null)) {
+			candidate.setAccessible(true);
 			return candidate;
 		}
 		throw new NoSuchMethodException();

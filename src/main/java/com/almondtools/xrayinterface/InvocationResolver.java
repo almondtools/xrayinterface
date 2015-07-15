@@ -2,6 +2,7 @@ package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.Converter.determineNeededConversions;
 import static com.almondtools.xrayinterface.Converter.isConverted;
+import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
 import static com.almondtools.xrayinterface.SignatureUtil.computeFieldNames;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.findTargetTypeName;
@@ -14,8 +15,11 @@ import static com.almondtools.xrayinterface.SignatureUtil.methodSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyAnnotationsOf;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyOf;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyTypeOf;
+import static java.lang.reflect.Modifier.isStatic;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -24,11 +28,13 @@ import java.util.Map;
 
 public class InvocationResolver {
 
+	private MethodHandles.Lookup lookup;
 	private Map<String, Field> fieldCache;
 	private Class<?> innerClass;
 
 	public InvocationResolver(Class<?> clazz) {
 		this.innerClass = clazz;
+		this.lookup = MethodHandles.lookup();
 		this.fieldCache = new HashMap<String, Field>();
 	}
 
@@ -51,11 +57,40 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		return new FieldSetter(findField(method), convertedPropertyTypeOf(method));
+		Field field = findField(method);
+		ensureNonFinal(field);
+		return createSetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	}
+
+	private MethodInvocationHandler createSetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+		try {
+			MethodHandle getter = lookup.unreflectSetter(field);
+			if (isStatic) {
+				return new StaticSetter(getter, convertedPropertyType).asMethodInvocationHandler();
+			} else {
+				return new FieldSetter(getter, convertedPropertyType);
+			}
+		} catch (IllegalAccessException e) {
+			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
+		}
 	}
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		return new FieldGetter(findField(method), convertedPropertyTypeOf(method));
+		Field field = findField(method);
+		return createGetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	}
+
+	private MethodInvocationHandler createGetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+		try {
+			MethodHandle getter = lookup.unreflectGetter(field);
+			if (isStatic) {
+				return new StaticGetter(getter, convertedPropertyType).asMethodInvocationHandler();
+			} else {
+				return new FieldGetter(getter, convertedPropertyType);
+			}
+		} catch (IllegalAccessException e) {
+			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
+		}
 	}
 
 	private Class<?> convertedPropertyTypeOf(Method method) {
@@ -83,6 +118,7 @@ public class InvocationResolver {
 					Field field = fieldCache.get(fieldName);
 					if (field == null) {
 						field = currentClass.getDeclaredField(fieldName);
+						field.setAccessible(true);
 						fieldCache.put(fieldName, field);
 					}
 					if (isCompliant(type, field.getType(), convert)) {
@@ -100,8 +136,9 @@ public class InvocationResolver {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
-				return new MethodInvoker(findMethod(method, currentClass), findConversionTarget(method));
-			} catch (NoSuchMethodException e) {
+				Method findMethod = findMethod(method, currentClass);
+				return new MethodInvoker(lookup.unreflect(findMethod), findConversionTarget(method));
+			} catch (NoSuchMethodException | IllegalAccessException e) {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
@@ -129,6 +166,7 @@ public class InvocationResolver {
 		String convertResult = findTargetTypeName(method.getAnnotations(), method.getReturnType());
 		for (Method candidate : clazz.getDeclaredMethods()) {
 			if (matchesSignature(method, candidate, convertArguments, convertResult)) {
+				candidate.setAccessible(true);
 				return candidate;
 			}
 		}
@@ -138,6 +176,7 @@ public class InvocationResolver {
 	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
 		Method candidate = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 		if (matchesSignature(method, candidate, null, null)) {
+			candidate.setAccessible(true);
 			return candidate;
 		}
 		throw new NoSuchMethodException();

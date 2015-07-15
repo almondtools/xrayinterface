@@ -79,8 +79,7 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	/**
 	 * wraps the given class. The result of this method will be decoratable with the new interface
 	 * 
-	 * @param type
-	 *            the class to unlock/decorate
+	 * @param type the class to unlock/decorate
 	 * @return the wrapped class
 	 */
 	public static ClassAccess xray(Class<?> type) {
@@ -92,8 +91,7 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	 * is compatible with a specific unlocked interface class. Note that in this case the "static" interface (all static methods including the constructor)
 	 * would be checked on conflicts. The instance interface could be checked with {@link ObjectAccess.check}.
 	 * 
-	 * @param type
-	 *            the target class to check on conflicts
+	 * @param type the target class to check on conflicts
 	 * @return the wrapped class
 	 */
 	public static ClassSnoop check(Class<?> clazz) {
@@ -103,11 +101,9 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	/**
 	 * maps the given interface to the wrapped class
 	 * 
-	 * @param interfaceClass
-	 *            the given interface class (defining the type of the result)
+	 * @param interfaceClass the given interface class (defining the type of the result)
 	 * @return an object of the type of interfaceClass (mapped to the members of the wrapped object)
-	 * @throws NoSuchMethodException
-	 *             if a method of the interface class could not be mapped according to the upper rules
+	 * @throws NoSuchMethodException if a method of the interface class could not be mapped according to the upper rules
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T to(Class<T> interfaceClass) {

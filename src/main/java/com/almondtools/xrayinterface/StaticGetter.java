@@ -2,6 +2,7 @@ package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.Converter.convertResult;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
 /**
@@ -9,30 +10,25 @@ import java.lang.reflect.Field;
  */
 public class StaticGetter implements StaticMethodInvocationHandler {
 
-	private Class<?> type;
-	private Field field;
+	private MethodHandle getter;
 	private Class<?> target;
 
 	/**
 	 * Gets a value on the given field.
-	 * @param type the static type of the field to access
-	 * @param field the field to access
+	 * @param getter method handle for the field to access
 	 */
-	public StaticGetter(Class<?> type, Field field) {
-		this.type = type;
-		this.field = field;
-		field.setAccessible(true);
+	public StaticGetter(MethodHandle getter) {
+		this.getter = getter;
 	}
 
 	/**
 	 * Gets a value on the given field. Beyond {@link #StaticGetter(Class, Field)} this constructor also converts the result
-	 * @param type the static type of the field to access
-	 * @param field the field to access
+	 * @param getter method handle for the field to access
 	 * @param target the target signature (target result)
 	 * @see Convert 
 	 */
-	public StaticGetter(Class<?> type, Field field, Class<?> target) {
-		this(type, field);
+	public StaticGetter(MethodHandle getter, Class<?> target) {
+		this(getter);
 		this.target = target;
 	}
 
@@ -41,14 +37,18 @@ public class StaticGetter implements StaticMethodInvocationHandler {
 		if (args != null && args.length != 0) {
 			throw new IllegalArgumentException("getters can only be invoked with no argument, was " + args.length + " arguments");
 		}
-		return r(field.get(type));
+		return r(getter.invoke());
 	}
 
 	private Object r(Object result) throws NoSuchMethodException {
 		if (target == null) {
 			return result;
 		}
-		return convertResult(target, field.getType(), result);
+		return convertResult(target, getter.type().returnType(), result);
+	}
+
+	public MethodInvocationHandler asMethodInvocationHandler() {
+		return (object, args) -> invoke(args);
 	}
 
 }

@@ -4,46 +4,65 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import org.junit.Before;
 import org.junit.Test;
-
-import com.almondtools.xrayinterface.ConstructorInvoker;
-import com.almondtools.xrayinterface.Convert;
 
 
 @SuppressWarnings("unused")
 public class ConstructorInvokerTest {
 
+	private Lookup lookup;
+
+	@Before
+	public void before() throws Exception {
+		this.lookup = MethodHandles.lookup();
+	}
+
+	private MethodHandle constructorOf(Class<?> clazz, Class<?>... parameters) throws IllegalAccessException, NoSuchMethodException {
+		Constructor<?> constructor = clazz.getDeclaredConstructor(parameters);
+		return constructorOf(constructor);
+	}
+
+	private MethodHandle constructorOf(Constructor<?> constructor) throws IllegalAccessException {
+		constructor.setAccessible(true);
+		return lookup.unreflectConstructor(constructor);
+	}
+
 	@Test
 	public void testInvokeWithoutProblems() throws Throwable {
-		Object result = new ConstructorInvoker(WithConstructor.class.getDeclaredConstructor()).invoke(new Object[0]);
+		Object result = new ConstructorInvoker(constructorOf(WithConstructor.class)).invoke(new Object[0]);
 		assertThat(result, instanceOf(WithConstructor.class));
 	}
 	
 	@Test
 	public void testInvokeWithImplicitConstructor() throws Throwable {
-		Object resultOnClass = new ConstructorInvoker(WithImplicitConstructor.class).invoke(new Object[0]);
+		Object resultOnClass = new ConstructorInvoker(constructorOf(WithImplicitConstructor.class)).invoke(new Object[0]);
 		assertThat(resultOnClass, instanceOf(WithImplicitConstructor.class));
 
-		Object resultOnConstructor = new ConstructorInvoker(WithImplicitConstructor.class.getDeclaredConstructor()).invoke(new Object[0]);
+		Object resultOnConstructor = new ConstructorInvoker(constructorOf(WithImplicitConstructor.class)).invoke(new Object[0]);
 		assertThat(resultOnConstructor, instanceOf(WithImplicitConstructor.class));
 	}
 	
 	@Test(expected=NullPointerException.class)
 	public void testInvokeWithNPEConstructor() throws Throwable {
-		Object result = new ConstructorInvoker(WithConstructor.class.getDeclaredConstructor(boolean.class)).invoke(new Object[]{Boolean.FALSE});
+		Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(new Object[]{Boolean.FALSE});
 	}
 	
 	@Test(expected=IOException.class)
 	public void testInvokeWithIOConstructor() throws Throwable {
-		Object result = new ConstructorInvoker(WithConstructor.class.getDeclaredConstructor(boolean.class)).invoke(new Object[]{Boolean.TRUE});
+		Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(new Object[]{Boolean.TRUE});
 	}
 	
 	@Test
 	public void testInvokeWithArgumentConversion() throws Throwable {
 		Method method = Constructors.class.getDeclaredMethod("create");
-		ConstructorInvoker constructor = new ConstructorInvoker(WithConvertedConstructor.class.getDeclaredConstructor(), method );
+		ConstructorInvoker constructor = new ConstructorInvoker(constructorOf(WithConvertedConstructor.class), method );
 		Object result = constructor.invoke(new Object[0]);
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
@@ -51,7 +70,7 @@ public class ConstructorInvokerTest {
 	@Test
 	public void testInvokeWithResultConversion() throws Throwable {
 		Method method = Constructors.class.getDeclaredMethod("create", ConvertedInterface.class);
-		ConstructorInvoker constructor = new ConstructorInvoker(WithConvertedConstructor.class.getDeclaredConstructor(WithConvertedConstructor.class), method );
+		ConstructorInvoker constructor = new ConstructorInvoker(constructorOf(WithConvertedConstructor.class, WithConvertedConstructor.class), method );
 		Object result = constructor.invoke(new ConvertedInterface() {
 		});
 		assertThat(result, instanceOf(WithConvertedConstructor.class));

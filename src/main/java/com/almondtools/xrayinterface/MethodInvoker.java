@@ -3,6 +3,7 @@ package com.almondtools.xrayinterface;
 import static com.almondtools.xrayinterface.Converter.convertArguments;
 import static com.almondtools.xrayinterface.Converter.convertResult;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -11,50 +12,54 @@ import java.lang.reflect.Method;
  */
 public class MethodInvoker implements MethodInvocationHandler {
 
-	private Method method;
-	private Method target;
+	private MethodHandle method;
+	private Class<?>[] targetParameterTypes;
+	private Class<?> targetReturnType;
 
 	/**
 	 * Invokes the given method
 	 * @param method the method to invoke
 	 */
-	public MethodInvoker(Method method) {
+	public MethodInvoker(MethodHandle method) {
 		this.method = method;
-		method.setAccessible(true);
 	}
-	
+
 	/**
 	 * Invokes a given method. Beyond {@link #MethodInvoker(Method)} this constructor also converts the method signature
 	 * @param method the method to invoke
 	 * @param target the target signature (source arguments, target result)
 	 * @see Convert
 	 */
-	public MethodInvoker(Method method, Method target) {
+	public MethodInvoker(MethodHandle method, Method target) {
 		this(method);
-		this.target = target;
+		if (target != null) {
+			this.targetReturnType = target.getReturnType();
+			this.targetParameterTypes = target.getParameterTypes();
+		}
 	}
 
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
 		try {
-			return r(method.invoke(object, a(args)));
+			MethodHandle unimorphMethod = method.bindTo(object);
+			return r(unimorphMethod.invokeWithArguments(a(args)));
 		} catch (InvocationTargetException e) {
 			throw e.getTargetException();
 		}
 	}
 
 	private Object[] a(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		if (target == null) {
+		if (targetParameterTypes == null || targetParameterTypes.length == 0) {
 			return args;
 		}
-		return convertArguments(target.getParameterTypes(), method.getParameterTypes(), args);
+		return convertArguments(targetParameterTypes, method.type().dropParameterTypes(0, 1).parameterArray(), args);
 	}
 
 	private Object r(Object result) throws NoSuchMethodException {
-		if (target == null) {
+		if (targetReturnType == null) {
 			return result;
 		}
-		return convertResult(target.getReturnType(), method.getReturnType(), result);
+		return convertResult(targetReturnType, method.type().returnType(), result);
 	}
 
 }
