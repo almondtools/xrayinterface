@@ -66,7 +66,7 @@ import java.util.Set;
  * 
  * @author Stefan Mandel
  */
-public class ObjectAccess extends InvocationResolver implements InvocationHandler {
+public class ObjectAccess extends InstanceInvocationResolver implements InvocationHandler {
 
 	private Map<Method, MethodInvocationHandler> methods;
 	private Object object;
@@ -131,6 +131,8 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 				}
 			}
 			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
+		} catch (NoSuchFieldException e) {
+			throw new InterfaceMismatchException("cannot resolve property " + e.getMessage() + " on " + object.getClass());
 		} catch (NoSuchMethodException e) {
 			throw new InterfaceMismatchException("cannot resolve method/property " + e.getMessage() + " on " + object.getClass());
 		}

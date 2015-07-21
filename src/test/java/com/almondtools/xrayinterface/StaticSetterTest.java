@@ -40,51 +40,51 @@ public class StaticSetterTest {
 
 	@Test
 	public void testSetField() throws Throwable {
-		Object result = new StaticSetter(setterFor(WithField.class,"field")).invoke(new Object[] { "hello" });
+		Object result = new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithField.field, equalTo("hello"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNone() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(new Object[0]);
+		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[0]);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke((Object[]) null);
+		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignature2() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(new Object[] { "hello", "world" });
+		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello", "world" });
 	}
 
 	@Test(expected = ClassCastException.class)
 	public void testSetFieldWithoutMatchingType() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(new Object[] { Integer.valueOf(1) });
+		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { Integer.valueOf(1) });
 	}
 
 	@Test
 	public void testSetStaticFinalField() throws Throwable {
-		Object result = new StaticSetter(setterFor(WithStaticFinalField.class,"RUNTIME")).invoke(new Object[] { "hello" });
+		Object result = new StaticSetter(setterFor(WithStaticFinalField.class,"RUNTIME")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithStaticFinalField.RUNTIME, equalTo("hello"));
 	}
 
 	@Test
 	public void testSetStaticFinalFieldCompileTime() throws Throwable {
-		Object voidresult = new StaticSetter(setterFor(WithStaticFinalField.class,"COMPILETIME")).invoke(new Object[] { "hello" });
+		Object voidresult = new StaticSetter(setterFor(WithStaticFinalField.class,"COMPILETIME")).invoke(null, new Object[] { "hello" });
 		assertThat(voidresult, nullValue());
 		assertThat(WithStaticFinalField.COMPILETIME, equalTo("ABC"));// paradox in source code, effect of inlining (see byte code of this line)
-		Object result = new StaticGetter(getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(new Object[0]);
+		Object result = new StaticGetter(getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[0]);
 		assertThat(result, equalTo((Object) "hello"));
 	}
 
 	@Test
 	public void testInvokeWithArgumentConversion() throws Throwable {
 		StaticSetter staticMethod = new StaticSetter(setterFor(WithConvertedProperty.class,"converted"), ConvertedInterface.class);
-		staticMethod.invoke(new ConvertedInterface() {
+		staticMethod.invoke(null, new ConvertedInterface() {
 		});
 		assertThat(WithConvertedProperty.converted, notNullValue());
 	}

@@ -1,5 +1,8 @@
 package com.almondtools.xrayinterface;
 
+import static com.almondtools.xrayinterface.BindingType.GET;
+import static com.almondtools.xrayinterface.BindingType.METHOD;
+import static com.almondtools.xrayinterface.BindingType.SET;
 import static com.almondtools.xrayinterface.XRayMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -25,15 +28,15 @@ public class ObjectAccessTest {
 	}
 
 	@Test
-		public void testXrayable() throws Exception {
-			assertThat(LockedObject.class, providesFeaturesOf(UnlockedObject.class));
-			assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingMethodObject.class)));
-			assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingGetterObject.class)));
-			assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingSetterObject.class)));
-			assertThat(LockedObjectWithDeclaredExceptions.class, providesFeaturesOf(UnlockedWithCorrectExceptions.class));
-			assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithMissingExceptions.class)));
-			assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithFalseExceptions.class)));
-		}
+	public void testXrayable() throws Exception {
+		assertThat(LockedObject.class, providesFeaturesOf(UnlockedObject.class));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingMethodObject.class)));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingGetterObject.class)));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingSetterObject.class)));
+		assertThat(LockedObjectWithDeclaredExceptions.class, providesFeaturesOf(UnlockedWithCorrectExceptions.class));
+		assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithMissingExceptions.class)));
+		assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithFalseExceptions.class)));
+	}
 
 	@Test
 	public void testMethodInvocation() throws Exception {
@@ -41,6 +44,14 @@ public class ObjectAccessTest {
 		assertThat(unlocked.myMethod("123", true), equalTo(123));
 		assertThat(unlocked.myMethod("123", false), equalTo(0));
 		assertThat(unlocked.myMethod("ABC", false), equalTo(0));
+	}
+
+	@Test
+	public void testMethodInvocationWithBindingAnnotations() throws Exception {
+		UnlockedWithBindingAnnotationsObject unlocked = ObjectAccess.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
+		assertThat(unlocked.method("123", true), equalTo(123));
+		assertThat(unlocked.method("123", false), equalTo(0));
+		assertThat(unlocked.method("ABC", false), equalTo(0));
 	}
 
 	@Test
@@ -55,6 +66,18 @@ public class ObjectAccessTest {
 		assertThat(unlocked.getMyField(), equalTo("ABC"));
 	}
 
+	@Test
+	public void testSetGetFieldWithBindingAnnotations() throws Exception {
+		UnlockedWithBindingAnnotationsObject unlocked = ObjectAccess.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
+		unlocked.set("123");
+		assertThat(object.myPublicMethod(), equalTo(123));
+		assertThat(unlocked.get(), equalTo("123"));
+		
+		unlocked.set("ABC");
+		assertThat(object.myPublicMethod(), equalTo(0));
+		assertThat(unlocked.get(), equalTo("ABC"));
+	}
+	
 	@Test
 	public void testNotExistingMethodInvocation() throws Exception {
 		try {
@@ -125,7 +148,7 @@ public class ObjectAccessTest {
 		unlocked.setInteger(-2);
 		assertThat(unlocked.getInteger(), equalTo(-2));
 	}
-	
+
 	@Test
 	public void testFinalSetAfterGet() throws Exception {
 		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
@@ -134,8 +157,8 @@ public class ObjectAccessTest {
 		unlocked.setInteger(result);
 		assertThat(unlocked.getInteger(), equalTo(2));
 	}
-	
-	public static interface UnlockedObject {
+
+	interface UnlockedObject {
 		void setMyField(String value);
 
 		String getMyField();
@@ -154,34 +177,46 @@ public class ObjectAccessTest {
 
 	}
 
-	public static interface UnlockedNotMatchingMethodObject {
+	interface UnlockedNotMatchingMethodObject {
 
 		boolean notExistingMethod();
 	}
 
-	public static interface UnlockedNotMatchingSetterObject {
+	interface UnlockedNotMatchingSetterObject {
 
 		void setNotExisting(boolean b);
 	}
 
-	public static interface UnlockedNotMatchingGetterObject {
+	interface UnlockedNotMatchingGetterObject {
 
 		boolean getNotExisting();
 	}
 
-	public static interface UnlockedWithCorrectExceptions {
+	interface UnlockedWithCorrectExceptions {
 
 		String myMethod(String string) throws IOException;
 	}
 
-	public static interface UnlockedWithMissingExceptions {
+	interface UnlockedWithMissingExceptions {
 
 		String myMethod(String string);
 	}
 
-	public static interface UnlockedWithFalseExceptions {
+	interface UnlockedWithFalseExceptions {
 
 		String myMethod(String string) throws ClassCastException;
+	}
+
+	interface UnlockedWithBindingAnnotationsObject {
+		@Bind(type=SET, name="myField")
+		void set(String value);
+
+		@Bind(type=GET, name="myField")
+		String get();
+
+		@Bind(type=METHOD, name="myMethod")
+		int method(String string, boolean flag);
+
 	}
 
 }

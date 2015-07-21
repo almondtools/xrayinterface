@@ -29,38 +29,38 @@ public class StaticGetterTest {
 
 	@Test
 	public void testGetField() throws Throwable {
-		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke(new Object[0]);
+		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke(null, new Object[0]);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetFieldWithFailingSignatureOne() throws Throwable {
-		new StaticGetter(getterFor(WithField.class, "field")).invoke(new Object[] { 1 });
+		new StaticGetter(getterFor(WithField.class, "field")).invoke(null, new Object[] { 1 });
 	}
 
 	@Test
 	public void testGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke((Object[]) null);
+		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke(null, (Object[]) null);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test
 	public void testInvokeWithResultConversion() throws Throwable {
 		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ConvertedInterface.class);
-		Object result = staticMethod.invoke();
+		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testConvertingGetFieldContravariant() throws Throwable {
 		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ContravariantInterface.class);
-		staticMethod.invoke();
+		staticMethod.invoke(null);
 	}
 
 	@Test
 	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
 		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ConvertedContravariantInterface.class);
-		Object result = staticMethod.invoke();
+		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
 		assertThat(((ConvertedContravariantInterface) result).getOther().toString(), equalTo("other"));
 	}

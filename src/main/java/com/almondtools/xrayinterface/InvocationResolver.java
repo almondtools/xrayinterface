@@ -1,72 +1,248 @@
 package com.almondtools.xrayinterface;
 
-import static com.almondtools.xrayinterface.Converter.determineNeededConversions;
-import static com.almondtools.xrayinterface.Converter.isConverted;
+import static com.almondtools.xrayinterface.BindingType.CONSTRUCTOR;
+import static com.almondtools.xrayinterface.BindingType.GET;
+import static com.almondtools.xrayinterface.BindingType.METHOD;
+import static com.almondtools.xrayinterface.BindingType.SET;
 import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
 import static com.almondtools.xrayinterface.SignatureUtil.computeFieldNames;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
-import static com.almondtools.xrayinterface.SignatureUtil.findTargetTypeName;
 import static com.almondtools.xrayinterface.SignatureUtil.isBooleanGetter;
-import static com.almondtools.xrayinterface.SignatureUtil.isCompliant;
 import static com.almondtools.xrayinterface.SignatureUtil.isGetter;
 import static com.almondtools.xrayinterface.SignatureUtil.isSetter;
-import static com.almondtools.xrayinterface.SignatureUtil.matchesSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.methodSignature;
-import static com.almondtools.xrayinterface.SignatureUtil.propertyAnnotationsOf;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyOf;
-import static com.almondtools.xrayinterface.SignatureUtil.propertyTypeOf;
+import static com.almondtools.xrayinterface.Type.convertedTypes;
+import static com.almondtools.xrayinterface.Type.isWeakMatching;
+import static com.almondtools.xrayinterface.Type.matchedTypes;
+import static com.almondtools.xrayinterface.Type.matches;
 import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.asList;
 
-import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class InvocationResolver {
 
 	private MethodHandles.Lookup lookup;
 	private Map<String, Field> fieldCache;
-	private Class<?> innerClass;
+	private Class<?> type;
 
-	public InvocationResolver(Class<?> clazz) {
-		this.innerClass = clazz;
+	public InvocationResolver(Class<?> type) {
+		this.type = type;
 		this.lookup = MethodHandles.lookup();
 		this.fieldCache = new HashMap<String, Field>();
 	}
 
-	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
-		try {
-			return createMethodInvocator(method);
-		} catch (NoSuchMethodException e) {
-			try {
-				if (isSetter(method)) {
-					return createSetterInvocator(method);
-				} else if (isGetter(method) || isBooleanGetter(method)) {
-					return createGetterInvocator(method);
-				} else {
-					throw e;
-				}
-			} catch (NoSuchFieldException e2) {
-				throw e;
-			}
+	public Class<?> getType() {
+		return type;
+	}
+
+	protected BindingSignature resolveSignature(Method method) {
+		BindingSignature signature = initSignature(method.getAnnotation(Bind.class));
+		signature = completeSignature(signature, method);
+		return signature;
+	}
+
+	private BindingSignature initSignature(Bind bind) {
+		if (bind == null) {
+			return new BindingSignature();
+		} else {
+			return new BindingSignature(bind.type(), bind.name());
 		}
 	}
 
-	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		Field field = findField(method);
-		ensureNonFinal(field);
-		return createSetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	private BindingSignature completeSignature(BindingSignature signature, Method method) {
+		for (BindingType type : signature.types()) {
+			try {
+				return completeSignature(type, signature, method);
+			} catch (NoSuchFieldException | NoSuchMethodException e) {
+				continue;
+			}
+		}
+		return new BindingSignature(method.getName());
 	}
 
-	private MethodInvocationHandler createSetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+	private BindingSignature completeSignature(BindingType type, BindingSignature signature, Method method) throws NoSuchMethodException, NoSuchFieldException {
+		switch (type) {
+		case SET:
+			return completeSetter(signature, method);
+		case GET:
+			return completeGetter(signature, method);
+		case METHOD:
+			return completeMethod(signature, method);
+		case CONSTRUCTOR:
+			return completeConstructor(signature, method);
+		default:
+			throw new NoSuchMethodException();
+		}
+	}
+
+	private BindingSignature completeSetter(BindingSignature signature, Method method) throws NoSuchFieldException {
+		if (!signature.hasName() && !isSetter(method)) {
+			throw new NoSuchFieldException();
+		}
+		Type type = setterType(method);
+		List<String> names = signature.hasName() ? asList(signature.name) : computeFieldNames(propertyOf(method));
+		for (String name : names) {
+			try {
+				Field field = findField(name, type);
+				signature.params = new Type[] { type.matching(field.getType()) };
+				signature.name = name;
+				signature.type = SET;
+				return signature;
+			} catch (NoSuchFieldException e) {
+			}
+		}
+		throw new NoSuchFieldException(fieldSignature(names, type.matchedType()));
+	}
+
+	private Type setterType(Method method) {
+		Parameter[] parameters = method.getParameters();
+		if (parameters.length == 1) {
+			Parameter value = parameters[0];
+			Class<?> valueClass = value.getType();
+			Convert converted = value.getAnnotation(Convert.class);
+			if (converted != null) {
+				return new MatchType(name(converted, valueClass), valueClass);
+			} else {
+				return new FixedType(valueClass);
+			}
+		} else {
+			return null;
+		}
+	}
+
+	private BindingSignature completeGetter(BindingSignature signature, Method method) throws NoSuchFieldException {
+		if (!signature.hasName() && !(isGetter(method) || isBooleanGetter(method))) {
+			throw new NoSuchFieldException();
+		}
+		Type type = getterType(method);
+		List<String> names = signature.hasName() ? asList(signature.name) : computeFieldNames(propertyOf(method));
+		for (String name : names) {
+			try {
+				Field field = findField(name, type);
+				signature.result = type.matching(field.getType());
+				signature.name = name;
+				signature.type = GET;
+				return signature;
+			} catch (NoSuchFieldException e) {
+			}
+		}
+		throw new NoSuchFieldException(fieldSignature(names, type.matchedType()));
+	}
+
+	private Type getterType(Method method) {
+		Class<?> valueClass = method.getReturnType();
+		Convert converted = method.getAnnotation(Convert.class);
+		if (converted != null) {
+			return new MatchType(name(converted, valueClass), valueClass);
+		} else {
+			return new FixedType(valueClass);
+		}
+	}
+
+	private String name(Convert converted, Class<?> valueClass) {
+		String name = converted.value();
+		if ("".equals(name)) {
+			name = valueClass.getSimpleName();
+		}
+		return name;
+	}
+
+	private BindingSignature completeMethod(BindingSignature signature, Method method) throws NoSuchMethodException {
+		String name = signature.hasName() ? signature.name : method.getName();
+		Type result = resultType(method);
+		Type[] params = paramTypes(method);
+		Type[] exceptions = exceptionTypes(method);
+		Method targetMethod = findMethod(name, result, params, exceptions);
+		signature.result = result.matching(targetMethod.getReturnType());
+		signature.params = matching(params, targetMethod.getParameterTypes());
+		signature.exceptions = matching(exceptions, targetMethod.getExceptionTypes());
+		signature.name = name;
+		signature.type = METHOD;
+		return signature;
+	}
+
+	private Type resultType(Method method) {
+		Class<?> valueClass = method.getReturnType();
+		Convert converted = method.getAnnotation(Convert.class);
+		if (converted != null) {
+			return new MatchType(name(converted, valueClass), valueClass);
+		} else {
+			return new FixedType(valueClass);
+		}
+	}
+
+	private Type[] paramTypes(Method method) {
+		Parameter[] parameters = method.getParameters();
+		Type[] types = new Type[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			Parameter value = parameters[i];
+			Class<?> valueClass = value.getType();
+			Convert converted = value.getAnnotation(Convert.class);
+			if (converted != null) {
+				types[i] = new MatchType(name(converted, valueClass), valueClass);
+			} else {
+				types[i] = new FixedType(valueClass);
+			}
+		}
+		return types;
+	}
+
+	private Type[] exceptionTypes(Method method) {
+		Class<?>[] exceptions = method.getExceptionTypes();
+		Type[] types = new Type[exceptions.length];
+		for (int i = 0; i < exceptions.length; i++) {
+			Class<?> valueClass = exceptions[i];
+			types[i] = new FixedType(valueClass);
+		}
+		return types;
+	}
+
+	private BindingSignature completeConstructor(BindingSignature signature, Method method) throws NoSuchMethodException {
+		if (!signature.hasName() && !SignatureUtil.isConstructor(method)) {
+			throw new NoSuchMethodException();
+		}
+		Type result = resultType(method);
+		Type[] params = paramTypes(method);
+		Type[] exceptions = exceptionTypes(method);
+		Constructor<?> targetMethod = findConstructor(result, params, exceptions);
+		signature.result = result.matching(targetMethod.getDeclaringClass());
+		signature.params = matching(params, targetMethod.getParameterTypes());
+		signature.exceptions = matching(exceptions, targetMethod.getExceptionTypes());
+		signature.name = "";
+		signature.type = CONSTRUCTOR;
+		return signature;
+	}
+
+	private Type[] matching(Type[] types, Class<?>[] matchingTypes) {
+		for (int i = 0; i < types.length; i++) {
+			types[i] = types[i].matching(matchingTypes[i]);
+		}
+		return types;
+	}
+
+	protected MethodInvocationHandler createSetterInvocator(String name, Type param) throws NoSuchFieldException {
+		Field field = findField(name, param);
+		ensureNonFinal(field);
+		return createSetterInvocator(field, param.convertedType());
+	}
+
+	private MethodInvocationHandler createSetterInvocator(Field field, Class<?> convertedPropertyType) throws NoSuchFieldException {
 		try {
 			MethodHandle getter = lookup.unreflectSetter(field);
-			if (isStatic) {
-				return new StaticSetter(getter, convertedPropertyType).asMethodInvocationHandler();
+			if (isStatic(field.getModifiers())) {
+				return new StaticSetter(getter, convertedPropertyType);
 			} else {
 				return new FieldSetter(getter, convertedPropertyType);
 			}
@@ -75,15 +251,15 @@ public class InvocationResolver {
 		}
 	}
 
-	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		Field field = findField(method);
-		return createGetterInvocator(field, convertedPropertyTypeOf(method), isStatic(field.getModifiers()));
+	protected MethodInvocationHandler createGetterInvocator(String name, Type result) throws NoSuchFieldException {
+		Field field = findField(name, result);
+		return createGetterInvocator(field, result.convertedType());
 	}
 
-	private MethodInvocationHandler createGetterInvocator(Field field, Class<?> convertedPropertyType, boolean isStatic) throws NoSuchFieldException {
+	private MethodInvocationHandler createGetterInvocator(Field field, Class<?> convertedPropertyType) throws NoSuchFieldException {
 		try {
 			MethodHandle getter = lookup.unreflectGetter(field);
-			if (isStatic) {
+			if (isStatic(field.getModifiers())) {
 				return new StaticGetter(getter, convertedPropertyType).asMethodInvocationHandler();
 			} else {
 				return new FieldGetter(getter, convertedPropertyType);
@@ -93,93 +269,107 @@ public class InvocationResolver {
 		}
 	}
 
-	private Class<?> convertedPropertyTypeOf(Method method) {
-		if (!isConverted(method)) {
-			return null;
-		}
-		return propertyTypeOf(method);
-	}
-
-	private Field findField(Method method) throws NoSuchFieldException {
-		if (isConverted(method)) {
-			return findField(propertyOf(method), propertyTypeOf(method), propertyAnnotationsOf(method));
-		} else {
-			return findField(propertyOf(method), propertyTypeOf(method), new Annotation[0]);
-		}
-	}
-
-	protected Field findField(String fieldPattern, Class<?> type, Annotation[] annotations) throws NoSuchFieldException {
-		String convert = findTargetTypeName(annotations, type);
-		List<String> fieldNames = computeFieldNames(fieldPattern);
-		Class<?> currentClass = this.innerClass;
-		while (currentClass != Object.class) {
-			for (String fieldName : fieldNames) {
-				try {
-					Field field = fieldCache.get(fieldName);
-					if (field == null) {
-						field = currentClass.getDeclaredField(fieldName);
-						field.setAccessible(true);
-						fieldCache.put(fieldName, field);
-					}
-					if (isCompliant(type, field.getType(), convert)) {
-						return field;
-					}
-				} catch (NoSuchFieldException e) {
-				}
-			}
-			currentClass = currentClass.getSuperclass();
-		}
-		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
-	}
-
-	protected MethodInvocationHandler createMethodInvocator(Method method) throws NoSuchMethodException {
-		Class<?> currentClass = this.innerClass;
+	protected Field findField(String name, Type type) throws NoSuchFieldException {
+		Class<?> currentClass = this.type;
 		while (currentClass != Object.class) {
 			try {
-				Method findMethod = findMethod(method, currentClass);
-				return new MethodInvoker(lookup.unreflect(findMethod), findConversionTarget(method));
-			} catch (NoSuchMethodException | IllegalAccessException e) {
+				Field field = fieldCache.get(name);
+				if (field == null) {
+					field = currentClass.getDeclaredField(name);
+					field.setAccessible(true);
+					fieldCache.put(name, field);
+				}
+				if (type.matches(field.getType())) {
+					return field;
+				}
+			} catch (NoSuchFieldException e) {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
+		Class<?> fieldType = type.matchedType();
+		throw new NoSuchFieldException(SignatureUtil.fieldSignature(name, fieldType));
 	}
 
-	private Method findMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
-		if (isConverted(method)) {
-			return findConvertibleMethod(method, clazz);
-		} else {
-			return findMatchingMethod(method, clazz);
-		}
+	protected MethodInvocationHandler createMethodInvocator(String name, Type result, Type[] params, Type[] exceptions) throws NoSuchMethodException {
+		Method method = findMethod(name, result, params, exceptions);
+		return createMethodInvocator(method, result, params);
 	}
 
-	private Method findConversionTarget(Method method) {
-		if (isConverted(method)) {
-			return method;
-		} else {
-			return null;
-		}
-	}
-
-	private Method findConvertibleMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
-		String[] convertArguments = determineNeededConversions(method.getParameterAnnotations(), method.getParameterTypes());
-		String convertResult = findTargetTypeName(method.getAnnotations(), method.getReturnType());
-		for (Method candidate : clazz.getDeclaredMethods()) {
-			if (matchesSignature(method, candidate, convertArguments, convertResult)) {
-				candidate.setAccessible(true);
-				return candidate;
+	private MethodInvocationHandler createMethodInvocator(Method method, Type result, Type[] params) throws NoSuchMethodException {
+		try {
+			MethodHandle methodHandle = lookup.unreflect(method);
+			if (isStatic(method.getModifiers())) {
+				return new StaticMethodInvoker(methodHandle, result.convertedType(), convertedTypes(params));
+			} else {
+				return new MethodInvoker(methodHandle, result.convertedType(), convertedTypes(params));
 			}
+		} catch (IllegalAccessException e) {
+			throw new NoSuchMethodException(method.getName() + " is not accessible. Check your security manager.");
 		}
-		throw new NoSuchMethodException();
 	}
 
-	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
-		Method candidate = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
-		if (matchesSignature(method, candidate, null, null)) {
-			candidate.setAccessible(true);
-			return candidate;
+	protected Method findMethod(String name, Type result, Type[] params, Type[] exceptions) throws NoSuchMethodException {
+		boolean weakMatching = isWeakMatching(params);
+		Class<?>[] paramTypes = matchedTypes(params);
+		Class<?>[] exceptionTypes = matchedTypes(exceptions);
+		Class<?> currentClass = this.type;
+		while (currentClass != Object.class) {
+			try {
+				Method candidate = weakMatching ? matchMethod(currentClass, name, params) : matchStrong(currentClass, name, paramTypes);
+				if (result.matches(candidate.getReturnType())
+					&& Arrays.equals(exceptionTypes, candidate.getExceptionTypes())) {
+					candidate.setAccessible(true);
+					return candidate;
+				}
+			} catch (NoSuchMethodException e) {
+			}
+			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchMethodException();
+		throw new NoSuchMethodException(methodSignature(name, result.matchedType(), paramTypes, exceptionTypes));
+	}
+
+	private Method matchMethod(Class<?> currentClass, String name, Type[] params) throws NoSuchMethodException {
+		return Stream.of(currentClass.getDeclaredMethods())
+			.filter(method -> name.equals(method.getName()))
+			.filter(method -> matches(params, method.getParameterTypes()))
+			.findFirst()
+			.orElseThrow(() -> new NoSuchMethodException());
+	}
+
+	private Method matchStrong(Class<?> currentClass, String name, Class<?>[] paramTypes) throws NoSuchMethodException {
+		return currentClass.getDeclaredMethod(name, paramTypes);
+	}
+
+	protected MethodInvocationHandler createConstructorInvocator(Type result, Type[] params, Type[] exceptions) throws NoSuchMethodException {
+		Constructor<?> constructor = findConstructor(result, params, exceptions);
+		return createConstructorInvocator(constructor, result, params);
+	}
+
+	private MethodInvocationHandler createConstructorInvocator(Constructor<?> constructor, Type result, Type[] params) throws NoSuchMethodException {
+		try {
+			return new ConstructorInvoker(lookup.unreflectConstructor(constructor), result.convertedType(), convertedTypes(params));
+		} catch (IllegalAccessException e) {
+			throw new NoSuchMethodException(constructor.getName() + " is not accessible. Check your security manager.");
+		}
+	}
+
+	protected Constructor<?> findConstructor(Type result, Type[] params, Type[] exceptions) throws NoSuchMethodException {
+		Class<?>[] paramTypes = matchedTypes(params);
+		Class<?>[] exceptionTypes = matchedTypes(exceptions);
+		Class<?> currentClass = this.type;
+		while (currentClass != Object.class) {
+			try {
+				Constructor<?> candidate = currentClass.getDeclaredConstructor(paramTypes);
+				if (result.matches(type)
+					&& Arrays.equals(exceptionTypes, candidate.getExceptionTypes())) {
+					candidate.setAccessible(true);
+					return candidate;
+				}
+			} catch (NoSuchMethodException e) {
+			}
+			currentClass = currentClass.getSuperclass();
+		}
+		throw new NoSuchMethodException(SignatureUtil.methodSignature("<init>", type, paramTypes, exceptionTypes));
 	}
 
 }

@@ -104,9 +104,9 @@ public class SignatureUtilTest {
 
 	@Test
 	public void testPropertyOf() throws Exception {
-		assertThat(propertyOf(method("setSetter", String.class)), equalTo("Setter"));
-		assertThat(propertyOf(method("getGetter")), equalTo("Getter"));
-		assertThat(propertyOf(method("isBooleanGetter")), equalTo("BooleanGetter"));
+		assertThat(propertyOf(method("setSetter", String.class)), equalTo("setter"));
+		assertThat(propertyOf(method("getGetter")), equalTo("getter"));
+		assertThat(propertyOf(method("isBooleanGetter")), equalTo("booleanGetter"));
 	}
 
 	@Test

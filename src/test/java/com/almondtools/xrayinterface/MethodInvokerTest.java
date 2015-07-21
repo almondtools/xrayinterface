@@ -63,32 +63,32 @@ public class MethodInvokerTest {
 	@Test
 	public void testConvertedInvoke() throws Throwable {
 		WithMethod object = new WithMethod();
-		Object invoke = new MethodInvoker(methodOf(staticMethod()), staticMethod()).invoke(object, new Object[] { 1 });
+		Object invoke = new MethodInvoker(methodOf(staticMethod()), staticMethod().getReturnType(), staticMethod().getParameterTypes()).invoke(object, new Object[] { 1 });
 		assertThat((String) invoke, equalTo("1"));
 	}
 
 	@Test(expected = ClassCastException.class)
 	public void testConvertedInvokeFailingSignature() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(methodOf(staticMethod()), staticMethod()).invoke(object, new Object[] { "1" });
+		new MethodInvoker(methodOf(staticMethod()), staticMethod().getReturnType(), staticMethod().getParameterTypes()).invoke(object, new Object[] { "1" });
 	}
 
 	@Test(expected = IOException.class)
 	public void testConvertedInvokeCheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(methodOf(staticException()), staticException()).invoke(object, new Object[] { 2 });
+		new MethodInvoker(methodOf(staticException()), staticException().getReturnType(), staticException().getParameterTypes()).invoke(object, new Object[] { 2 });
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testConvertedInvokeUncheckedException() throws Throwable {
 		WithMethod object = new WithMethod();
-		new MethodInvoker(methodOf(staticException()), staticException()).invoke(object, new Object[] { 1 });
+		new MethodInvoker(methodOf(staticException()), staticException().getReturnType(), staticException().getParameterTypes()).invoke(object, new Object[] { 1 });
 	}
 
 	@Test
 	public void testInvokeWithDifferentMethods() throws Throwable {
 		ForSimpleObject object = new ForSimpleObject();
-		Object invoke = new MethodInvoker(methodOf(staticLongMethod()), interfaceLongMethod()).invoke(object, new Object[] { 1l, "2" });
+		Object invoke = new MethodInvoker(methodOf(staticLongMethod()), interfaceLongMethod().getReturnType(), interfaceLongMethod().getParameterTypes()).invoke(object, new Object[] { 1l, "2" });
 		assertThat((Integer) invoke, equalTo(3));
 	}
 

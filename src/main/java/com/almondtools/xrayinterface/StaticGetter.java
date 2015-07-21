@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 /**
  * Wraps a static field with read (getter) access.
  */
-public class StaticGetter implements StaticMethodInvocationHandler {
+public class StaticGetter implements MethodInvocationHandler {
 
 	private MethodHandle getter;
 	private Class<?> target;
@@ -33,7 +33,7 @@ public class StaticGetter implements StaticMethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object... args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args != null && args.length != 0) {
 			throw new IllegalArgumentException("getters can only be invoked with no argument, was " + args.length + " arguments");
 		}

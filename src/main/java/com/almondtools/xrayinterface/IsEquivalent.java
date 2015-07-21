@@ -93,7 +93,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
+		protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException, NoSuchFieldException {
 			IsEquivalent<S, T> satisfiesMatcher = (IsEquivalent<S, T>) getObject();
 			if (method.getName().startsWith(WITH) && method.getParameterTypes().length == 1 && method.getReturnType() == satisfiesMatcher.interfaceClazz) {
 				return satisfiesMatcher.handle(method.getName().substring(4));

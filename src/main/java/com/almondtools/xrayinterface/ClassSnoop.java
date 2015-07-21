@@ -31,7 +31,7 @@ public class ClassSnoop extends StaticInvocationResolver {
 		for (Method method : interfaceClazz.getDeclaredMethods()) {
 			try {
 				findInvocationHandler(method);
-			} catch (NoSuchMethodException e) {
+			} catch (NoSuchMethodException | NoSuchFieldException e) {
 				conflicts.add(method);
 			}
 		}

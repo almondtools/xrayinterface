@@ -69,11 +69,11 @@ import java.util.Map;
  */
 public class ClassAccess extends StaticInvocationResolver implements InvocationHandler {
 
-	private Map<Method, StaticMethodInvocationHandler> methods;
+	private Map<Method, MethodInvocationHandler> methods;
 
 	public ClassAccess(Class<?> type) {
 		super(type);
-		this.methods = new HashMap<Method, StaticMethodInvocationHandler>();
+		this.methods = new HashMap<Method, MethodInvocationHandler>();
 	}
 
 	/**
@@ -112,15 +112,15 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 				methods.put(method, findInvocationHandler(method));
 			}
 			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException | NoSuchFieldException e) {
 			throw new InterfaceMismatchException("cannot resolve method/property " + e.getMessage() + " on " + getType());
 		}
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		StaticMethodInvocationHandler handler = methods.get(method);
-		return handler.invoke(args);
+		MethodInvocationHandler handler = methods.get(method);
+		return handler.invoke(null, args);
 	}
 
 }

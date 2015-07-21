@@ -13,7 +13,7 @@ import java.util.List;
  * 
  * @author Stefan Mandel
  */
-public class ObjectSnoop extends InvocationResolver {
+public class ObjectSnoop extends InstanceInvocationResolver {
 
 	public ObjectSnoop(Class<?> clazz) {
 		super(clazz);
@@ -31,7 +31,7 @@ public class ObjectSnoop extends InvocationResolver {
 		for (Method method : interfaceClazz.getDeclaredMethods()) {
 			try {
 				findInvocationHandler(method);
-			} catch (NoSuchMethodException e) {
+			} catch (NoSuchFieldException | NoSuchMethodException e) {
 				conflicts.add(method);
 			}
 		}

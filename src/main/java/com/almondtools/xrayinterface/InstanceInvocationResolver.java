@@ -2,9 +2,9 @@ package com.almondtools.xrayinterface;
 
 import java.lang.reflect.Method;
 
-public class StaticInvocationResolver extends InvocationResolver {
+public class InstanceInvocationResolver extends InvocationResolver {
 
-	public StaticInvocationResolver(Class<?> type) {
+	public InstanceInvocationResolver(Class<?> type) {
 		super(type);
 	}
 
@@ -17,8 +17,6 @@ public class StaticInvocationResolver extends InvocationResolver {
 			return createGetterInvocator(signature.name, signature.result);
 		case METHOD:
 			return createMethodInvocator(signature.name, signature.result, signature.params, signature.exceptions);
-		case CONSTRUCTOR:
-			return createConstructorInvocator(signature.result, signature.params, signature.exceptions);
 		default:
 			throw new NoSuchMethodException("invocation resolver failed resolving: " + method.toGenericString());
 		}
