@@ -19,11 +19,11 @@ public class ClassAccessTest {
 	}
 
 	@Test
-		public void testXrayable() throws Exception {
-			assertThat(LockedObjectWithPrivateConstructor.class, canBeTreatedAs(UnlockedObject.class));
-			assertThat(LockedObjectWithPrivateConstructor.class, not(canBeTreatedAs(UnlockedNotMatchingObject.class)));
-			assertThat(LockedObjectWithPrivateConstructor.class, not(canBeTreatedAs(UnlockedFantasyObject.class)));
-		}
+	public void testXrayable() throws Exception {
+		assertThat(LockedObjectWithPrivateConstructor.class, canBeTreatedAs(UnlockedObject.class));
+		assertThat(LockedObjectWithPrivateConstructor.class, not(canBeTreatedAs(UnlockedNotMatchingObject.class)));
+		assertThat(LockedObjectWithPrivateConstructor.class, not(canBeTreatedAs(UnlockedFantasyObject.class)));
+	}
 
 	@Test
 	public void testConstructorInvocation() throws Exception {
@@ -53,7 +53,7 @@ public class ClassAccessTest {
 		assertThat(unlocked.getDEFAULT(), nullValue());
 	}
 
-	@Test(expected=InterfaceMismatchException.class)
+	@Test(expected = InterfaceMismatchException.class)
 	public void testWrongSignature() throws Exception {
 		ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedNotMatchingObject.class);
 	}

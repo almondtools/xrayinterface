@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
  * unfortunately some java compiler do inline literal constants. This setter may change the constant, but does not change inlined literals, resulting in strange effects.
  * better avoid setting static final variables or make sure, that they cannot be inlined (e.g. by making its value a trivial functional expression)
  */
-public class StaticSetter implements StaticMethodInvocationHandler {
+public class StaticSetter implements MethodInvocationHandler {
 
 	private MethodHandle setter;
 	private Class<?> target;
@@ -39,7 +39,7 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object... args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}
@@ -56,10 +56,6 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 			return arg;
 		}
 		return convertArgument(target, setter.type().parameterType(0), arg);
-	}
-
-	public MethodInvocationHandler asMethodInvocationHandler() {
-		return (object, args) -> invoke(args);
 	}
 
 }

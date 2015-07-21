@@ -38,30 +38,30 @@ public class StaticMethodInvokerTest {
 
 	@Test
 	public void testInvoke() throws Throwable {
-		Object invoke = new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(new Object[] { 1 });
+		Object invoke = new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(null, new Object[] { 1 });
 		assertThat((String) invoke, equalTo("1"));
 	}
 
 	@Test(expected = ClassCastException.class)
 	public void testInvokeFailingSignature() throws Throwable {
-		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(new Object[] { "1" });
+		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(null, new Object[] { "1" });
 	}
 
 	@Test(expected = IOException.class)
 	public void testInvokeCheckedException() throws Throwable {
-		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(new Object[] { 2 });
+		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 2 });
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testInvokeUncheckedException() throws Throwable {
-		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(new Object[] { 1 });
+		new StaticMethodInvoker(methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 1 });
 	}
 
 	@Test
 	public void testInvokeWithArgumentConversion() throws Throwable {
 		Method method = Methods.class.getDeclaredMethod("converted", ConvertedInterface.class);
-		StaticMethodInvoker staticMethod = new StaticMethodInvoker(methodOf(WithConvertedMethods.class,"converted", WithConvertedMethods.class), method );
-		Object result = staticMethod.invoke(new ConvertedInterface() {
+		StaticMethodInvoker staticMethod = new StaticMethodInvoker(methodOf(WithConvertedMethods.class,"converted", WithConvertedMethods.class), method.getReturnType(), method.getParameterTypes());
+		Object result = staticMethod.invoke(null, new ConvertedInterface() {
 		});
 		assertThat(result, equalTo((Object) Integer.valueOf(-1)));
 	}
@@ -69,8 +69,8 @@ public class StaticMethodInvokerTest {
 	@Test
 	public void testInvokeWithResultConversion() throws Throwable {
 		Method method = Methods.class.getDeclaredMethod("converted");
-		StaticMethodInvoker staticMethod = new StaticMethodInvoker(methodOf(WithConvertedMethods.class,"converted"), method );
-		Object result = staticMethod.invoke();
+		StaticMethodInvoker staticMethod = new StaticMethodInvoker(methodOf(WithConvertedMethods.class,"converted"), method.getReturnType(), method.getParameterTypes());
+		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 	

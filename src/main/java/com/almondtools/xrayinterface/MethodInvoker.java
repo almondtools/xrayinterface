@@ -30,12 +30,10 @@ public class MethodInvoker implements MethodInvocationHandler {
 	 * @param target the target signature (source arguments, target result)
 	 * @see Convert
 	 */
-	public MethodInvoker(MethodHandle method, Method target) {
+	public MethodInvoker(MethodHandle method, Class<?> targetReturnType, Class<?>[] targetParameterTypes) {
 		this(method);
-		if (target != null) {
-			this.targetReturnType = target.getReturnType();
-			this.targetParameterTypes = target.getParameterTypes();
-		}
+		this.targetReturnType = targetReturnType;
+		this.targetParameterTypes = targetParameterTypes;
 	}
 
 	@Override

@@ -1,11 +1,13 @@
 package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.BoxingUtil.getUnboxed;
+import static java.lang.Character.toLowerCase;
+import static java.lang.Character.toUpperCase;
+import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,9 +67,9 @@ public final class SignatureUtil {
 	public static String propertyOf(Method method) {
 		String name = method.getName();
 		if (isSetter(method) || isGetter(method)) {
-			return name.substring(3);
+			return toLowerCase(name.charAt(3)) + name.substring(4);
 		} else if (isBooleanGetter(method)) {
-			return name.substring(2);
+			return toLowerCase(name.charAt(2)) + name.substring(3);
 		} else {
 			return name;
 		}
@@ -94,15 +96,19 @@ public final class SignatureUtil {
 	}
 
 	public static List<String> computeFieldNames(String fieldPattern) {
-		List<String> names = new ArrayList<String>(2);
+		char firstCharUC = toUpperCase(fieldPattern.charAt(0));
+		char firstCharLC = toLowerCase(fieldPattern.charAt(0));
+		String lastChars = fieldPattern.substring(1);
+
 		if (fieldPattern.toUpperCase().equals(fieldPattern)) {
-			names.add(fieldPattern);
-			names.add(Character.toLowerCase(fieldPattern.charAt(0)) + fieldPattern.substring(1));
+			return asList(firstCharUC + lastChars, firstCharLC + lastChars);
 		} else {
-			names.add(Character.toLowerCase(fieldPattern.charAt(0)) + fieldPattern.substring(1));
-			names.add(fieldPattern);
+			return asList(firstCharLC + lastChars, firstCharUC + lastChars);
 		}
-		return names;
+	}
+
+	public static String fieldSignature(String fieldName, Class<?> type) {
+		return fieldSignature(asList(fieldName), type);
 	}
 
 	public static String fieldSignature(List<String> fieldNames, Class<?> type) {
@@ -156,6 +162,9 @@ public final class SignatureUtil {
 	}
 
 	private static String typeName(Class<?> clazz) {
+		if (clazz == null) {
+			return "<unknown>";
+		}
 		return clazz.getSimpleName();
 	}
 
@@ -194,8 +203,8 @@ public final class SignatureUtil {
 	}
 
 	public static boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
-		return candidateType.equals(requiredType) 
-			|| (requiredType.getSimpleName().equals(annotatedName) && requiredType.isAssignableFrom(candidateType))			
+		return candidateType.equals(requiredType)
+			|| (requiredType.getSimpleName().equals(annotatedName) && requiredType.isAssignableFrom(candidateType))
 			|| candidateType.getSimpleName().equals(annotatedName);
 	}
 

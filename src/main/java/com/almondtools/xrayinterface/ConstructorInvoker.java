@@ -6,12 +6,11 @@ import static com.almondtools.xrayinterface.Converter.convertResult;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Invokes a given constructor.
  */
-public class ConstructorInvoker implements StaticMethodInvocationHandler {
+public class ConstructorInvoker implements MethodInvocationHandler {
 
 	private MethodHandle constructor;
 	private Class<?>[] targetParameterTypes;
@@ -30,16 +29,14 @@ public class ConstructorInvoker implements StaticMethodInvocationHandler {
 	 * @param target the target signature (source arguments, target result)
 	 * @see Convert 
 	 */
-	public ConstructorInvoker(MethodHandle constructor, Method target) {
+	public ConstructorInvoker(MethodHandle constructor, Class<?> targetReturnType, Class<?>[] targetParameterTypes) {
 		this(constructor);
-		if (target != null) {
-			this.targetReturnType = target.getReturnType();
-			this.targetParameterTypes = target.getParameterTypes();
-		}
+		this.targetReturnType = targetReturnType;
+		this.targetParameterTypes = targetParameterTypes;
 	}
 
 	@Override
-	public Object invoke(Object... args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		try {
 			return r(constructor.invokeWithArguments(a(args)));
 		} catch (InvocationTargetException e) {

@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 /**
  * Invokes a given static method.
  */
-public class StaticMethodInvoker implements StaticMethodInvocationHandler {
+public class StaticMethodInvoker implements MethodInvocationHandler {
 
 	private MethodHandle method;
 	private Class<?>[] targetParameterTypes;
@@ -32,16 +32,14 @@ public class StaticMethodInvoker implements StaticMethodInvocationHandler {
 	 * @param target the target signature (source arguments, target result)
 	 * @see Convert
 	 */
-	public StaticMethodInvoker(MethodHandle method, Method target) {
+	public StaticMethodInvoker(MethodHandle method, Class<?> targetReturnType, Class<?>[] targetParameterTypes) {
 		this(method);
-		if (target != null) {
-			this.targetReturnType = target.getReturnType();
-			this.targetParameterTypes = target.getParameterTypes();
-		}
+		this.targetReturnType = targetReturnType;
+		this.targetParameterTypes = targetParameterTypes;
 	}
 
 	@Override
-	public Object invoke(Object... args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		try {
 			return r(method.invokeWithArguments(a(args)));
 		} catch (InvocationTargetException e) {
