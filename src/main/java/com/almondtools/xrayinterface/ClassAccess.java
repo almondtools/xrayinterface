@@ -76,6 +76,10 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 	}
 
+	public Map<Method, MethodInvocationHandler> getMethods() {
+		return methods;
+	}
+
 	/**
 	 * wraps the given class. The result of this method will be decoratable with the new interface
 	 * 
