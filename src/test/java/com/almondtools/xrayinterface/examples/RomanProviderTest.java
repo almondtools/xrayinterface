@@ -59,10 +59,9 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateConstructor() throws Exception {
-		NumberProvider numberProvider = ClassAccess
-				.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = ClassAccess.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
-				.create(21);
+				.newRandomNumberProvider(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
@@ -81,12 +80,10 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticField() throws Exception {
-		NumberProvider numberProvider = ClassAccess
-				.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = ClassAccess.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
-				.create(21);
-		ClassAccess
-				.xray(RandomNumberProvider.class)
+				.newRandomNumberProvider(21);
+		ClassAccess.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.setINSTANCE(numberProvider);
 		RomanProvider decorator = new RomanProvider(RandomNumberProvider.getInstance());
@@ -100,7 +97,7 @@ public class RomanProviderTest {
 				.xray(ReallyMeanNumberProvider.class)
 				.to(UnlockedReallyMeanNumberProvider.class);
 
-		ReallyMeanNumberProvider numberProvider = bluePrint.create();
+		ReallyMeanNumberProvider numberProvider = bluePrint.newReallyMeanNumberProvider();
 		bluePrint.setFINAL_INSTANCE(numberProvider);
 		xray(numberProvider)
 				.to(UnlockedNumberProvider.class)
@@ -118,13 +115,13 @@ public class RomanProviderTest {
 	}
 
 	private static interface UnlockedStaticNumberProvider {
-		RandomNumberProvider create(int seed);
+		RandomNumberProvider newRandomNumberProvider(int seed);
 
 		void setINSTANCE(NumberProvider provider);
 	}
 
 	private static interface UnlockedReallyMeanNumberProvider {
-		ReallyMeanNumberProvider create();
+		ReallyMeanNumberProvider newReallyMeanNumberProvider();
 
 		void setFINAL_INSTANCE(ReallyMeanNumberProvider provider);
 	}

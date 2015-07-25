@@ -1,5 +1,5 @@
 package com.almondtools.xrayinterface;
 
-public enum BindingType {
+public enum BindingQualifier {
 	SET, GET, CONSTRUCTOR, METHOD, AUTO;
 }

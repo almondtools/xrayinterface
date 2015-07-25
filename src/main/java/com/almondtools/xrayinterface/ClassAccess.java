@@ -67,7 +67,7 @@ import java.util.Map;
  * 
  * @author Stefan Mandel
  */
-public class ClassAccess extends StaticInvocationResolver implements InvocationHandler {
+public class ClassAccess extends InvocationResolver implements InvocationHandler {
 
 	private Map<Method, MethodInvocationHandler> methods;
 
@@ -95,7 +95,7 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	 * is compatible with a specific unlocked interface class. Note that in this case the "static" interface (all static methods including the constructor)
 	 * would be checked on conflicts. The instance interface could be checked with {@link ObjectAccess.check}.
 	 * 
-	 * @param type the target class to check on conflicts
+	 * @param qualifiers the target class to check on conflicts
 	 * @return the wrapped class
 	 */
 	public static ClassSnoop check(Class<?> clazz) {

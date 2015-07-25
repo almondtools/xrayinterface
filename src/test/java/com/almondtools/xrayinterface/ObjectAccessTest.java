@@ -1,8 +1,5 @@
 package com.almondtools.xrayinterface;
 
-import static com.almondtools.xrayinterface.BindingType.GET;
-import static com.almondtools.xrayinterface.BindingType.METHOD;
-import static com.almondtools.xrayinterface.BindingType.SET;
 import static com.almondtools.xrayinterface.XRayMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -14,9 +11,6 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.almondtools.xrayinterface.ObjectAccess;
-import com.almondtools.xrayinterface.InterfaceMismatchException;
 
 public class ObjectAccessTest {
 
@@ -208,13 +202,13 @@ public class ObjectAccessTest {
 	}
 
 	interface UnlockedWithBindingAnnotationsObject {
-		@Bind(type=SET, name="myField")
+		@SetProperty("myField")
 		void set(String value);
 
-		@Bind(type=GET, name="myField")
+		@GetProperty("myField")
 		String get();
 
-		@Bind(type=METHOD, name="myMethod")
+		@Delegate("myMethod")
 		int method(String string, boolean flag);
 
 	}

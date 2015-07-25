@@ -66,7 +66,7 @@ import java.util.Set;
  * 
  * @author Stefan Mandel
  */
-public class ObjectAccess extends InstanceInvocationResolver implements InvocationHandler {
+public class ObjectAccess extends InvocationResolver implements InvocationHandler {
 
 	private Map<Method, MethodInvocationHandler> methods;
 	private Object object;

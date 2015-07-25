@@ -28,7 +28,7 @@ public class TheOneAndOnlyTest {
 	@Test
 	public void testSingletonInjection() throws Exception {
 		XRayedStaticWithConstructor xrayedOneAndOnly = ClassAccess.xray(TheOneAndOnly.class).to(XRayedStaticWithConstructor.class);
-		TheOneAndOnly instance = xrayedOneAndOnly.create();
+		TheOneAndOnly instance = xrayedOneAndOnly.newTheOneAndOnly();
 		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
 		xrayedOneAndOnly.setInstance(instance);
 		assertThat(TheOneAndOnly.getInstance().isUnique(), is(false));
@@ -43,7 +43,7 @@ public class TheOneAndOnlyTest {
 	}
 
 	interface XRayedStaticWithConstructor {
-		TheOneAndOnly create();
+		TheOneAndOnly newTheOneAndOnly();
 		void setInstance(TheOneAndOnly instance);
 	}
 

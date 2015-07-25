@@ -1,9 +1,10 @@
 package com.almondtools.xrayinterface;
 
-import static com.almondtools.xrayinterface.BindingType.CONSTRUCTOR;
-import static com.almondtools.xrayinterface.BindingType.GET;
-import static com.almondtools.xrayinterface.BindingType.METHOD;
-import static com.almondtools.xrayinterface.BindingType.SET;
+import static com.almondtools.xrayinterface.BindingQualifier.AUTO;
+import static com.almondtools.xrayinterface.BindingQualifier.CONSTRUCTOR;
+import static com.almondtools.xrayinterface.BindingQualifier.GET;
+import static com.almondtools.xrayinterface.BindingQualifier.METHOD;
+import static com.almondtools.xrayinterface.BindingQualifier.SET;
 import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
 import static com.almondtools.xrayinterface.SignatureUtil.computeFieldNames;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
@@ -19,6 +20,7 @@ import static com.almondtools.xrayinterface.Type.matches;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.asList;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
@@ -27,11 +29,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class InvocationResolver {
+
+	private static Map<Class<? extends Annotation>, Function<Annotation, BindingSignature>> signatures = createSignatureMapping();
 
 	private MethodHandles.Lookup lookup;
 	private Map<String, Field> fieldCache;
@@ -47,22 +53,51 @@ public class InvocationResolver {
 		return type;
 	}
 
+	private static Map<Class<? extends Annotation>, Function<Annotation, BindingSignature>> createSignatureMapping() {
+		Map<Class<? extends Annotation>, Function<Annotation, BindingSignature>> signatures = new IdentityHashMap<>();
+		signatures.put(Construct.class, annotation -> new BindingSignature("", CONSTRUCTOR));
+		signatures.put(Delegate.class, annotation -> new BindingSignature(((Delegate) annotation).value(), METHOD));
+		signatures.put(SetProperty.class, annotation -> new BindingSignature(((SetProperty) annotation).value(), SET));
+		signatures.put(GetProperty.class, annotation -> new BindingSignature(((GetProperty) annotation).value(), GET));
+		return signatures;
+	}
+
+	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException, NoSuchFieldException {
+		BindingSignature signature = resolveSignature(method);
+		switch (signature.qualifier) {
+		case SET:
+			return createSetterInvocator(signature.name, signature.params[0]);
+		case GET:
+			return createGetterInvocator(signature.name, signature.result);
+		case METHOD:
+			return createMethodInvocator(signature.name, signature.result, signature.params, signature.exceptions);
+		case CONSTRUCTOR:
+			return createConstructorInvocator(signature.result, signature.params, signature.exceptions);
+		default:
+			throw new NoSuchMethodException("invocation resolver failed resolving: " + method.toGenericString());
+		}
+	}
+
 	protected BindingSignature resolveSignature(Method method) {
-		BindingSignature signature = initSignature(method.getAnnotation(Bind.class));
+		BindingSignature signature = initSignature(method.getAnnotations());
 		signature = completeSignature(signature, method);
 		return signature;
 	}
 
-	private BindingSignature initSignature(Bind bind) {
-		if (bind == null) {
+	private BindingSignature initSignature(Annotation[] annotations) {
+		if (annotations == null) {
 			return new BindingSignature();
 		} else {
-			return new BindingSignature(bind.type(), bind.name());
+			return Stream.of(annotations)
+				.filter(annotation -> signatures.containsKey(annotation.annotationType()))
+				.map(annotation -> signatures.get(annotation.annotationType()).apply(annotation))
+				.findFirst()
+				.orElse(new BindingSignature());
 		}
 	}
 
 	private BindingSignature completeSignature(BindingSignature signature, Method method) {
-		for (BindingType type : signature.types()) {
+		for (BindingQualifier type : signature.types()) {
 			try {
 				return completeSignature(type, signature, method);
 			} catch (NoSuchFieldException | NoSuchMethodException e) {
@@ -72,7 +107,7 @@ public class InvocationResolver {
 		return new BindingSignature(method.getName());
 	}
 
-	private BindingSignature completeSignature(BindingType type, BindingSignature signature, Method method) throws NoSuchMethodException, NoSuchFieldException {
+	private BindingSignature completeSignature(BindingQualifier type, BindingSignature signature, Method method) throws NoSuchMethodException, NoSuchFieldException {
 		switch (type) {
 		case SET:
 			return completeSetter(signature, method);
@@ -98,7 +133,7 @@ public class InvocationResolver {
 				Field field = findField(name, type);
 				signature.params = new Type[] { type.matching(field.getType()) };
 				signature.name = name;
-				signature.type = SET;
+				signature.qualifier = SET;
 				return signature;
 			} catch (NoSuchFieldException e) {
 			}
@@ -133,7 +168,7 @@ public class InvocationResolver {
 				Field field = findField(name, type);
 				signature.result = type.matching(field.getType());
 				signature.name = name;
-				signature.type = GET;
+				signature.qualifier = GET;
 				return signature;
 			} catch (NoSuchFieldException e) {
 			}
@@ -169,7 +204,7 @@ public class InvocationResolver {
 		signature.params = matching(params, targetMethod.getParameterTypes());
 		signature.exceptions = matching(exceptions, targetMethod.getExceptionTypes());
 		signature.name = name;
-		signature.type = METHOD;
+		signature.qualifier = METHOD;
 		return signature;
 	}
 
@@ -210,7 +245,7 @@ public class InvocationResolver {
 	}
 
 	private BindingSignature completeConstructor(BindingSignature signature, Method method) throws NoSuchMethodException {
-		if (!signature.hasName() && !SignatureUtil.isConstructor(method)) {
+		if (signature.qualifier == AUTO && !SignatureUtil.isConstructor(method)) {
 			throw new NoSuchMethodException();
 		}
 		Type result = resultType(method);
@@ -221,7 +256,7 @@ public class InvocationResolver {
 		signature.params = matching(params, targetMethod.getParameterTypes());
 		signature.exceptions = matching(exceptions, targetMethod.getExceptionTypes());
 		signature.name = "";
-		signature.type = CONSTRUCTOR;
+		signature.qualifier = CONSTRUCTOR;
 		return signature;
 	}
 

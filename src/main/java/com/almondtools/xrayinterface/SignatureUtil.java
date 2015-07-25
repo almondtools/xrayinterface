@@ -13,7 +13,7 @@ import java.util.List;
 
 public final class SignatureUtil {
 
-	public static final String CONSTRUCTOR = "create";
+	public static final String CONSTRUCTOR = "new";
 	public static final String IS = "is";
 	public static final String GET = "get";
 	public static final String SET = "set";
@@ -23,7 +23,8 @@ public final class SignatureUtil {
 
 	public static boolean isConstructor(Method method) {
 		String name = method.getName();
-		return name.equals(CONSTRUCTOR)
+		return name.startsWith(CONSTRUCTOR)
+			&& name.endsWith(method.getReturnType().getSimpleName())
 			&& method.getReturnType() != void.class
 			&& !method.getReturnType().isPrimitive();
 	}

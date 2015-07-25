@@ -13,7 +13,7 @@ import java.util.List;
  * 
  * @author Stefan Mandel
  */
-public class ObjectSnoop extends InstanceInvocationResolver {
+public class ObjectSnoop extends InvocationResolver {
 
 	public ObjectSnoop(Class<?> clazz) {
 		super(clazz);

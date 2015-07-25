@@ -13,7 +13,7 @@ import java.util.List;
  * 
  * @author Stefan Mandel
  */
-public class ClassSnoop extends StaticInvocationResolver {
+public class ClassSnoop extends InvocationResolver {
 
 	public ClassSnoop(Class<?> clazz) {
 		super(clazz);

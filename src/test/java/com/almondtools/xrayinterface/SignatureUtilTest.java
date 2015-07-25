@@ -116,11 +116,11 @@ public class SignatureUtilTest {
 
 	@Test
 	public void testIsConstructor() throws Exception {
-		assertThat(isConstructor(method("create")), is(true));
-		assertThat(isConstructor(method("create", String.class)), is(true));
-		assertThat(isConstructor(method("notcreate")), is(false));
-		assertThat(isConstructor(method("create", int.class)), is(false));
-		assertThat(isConstructor(method("create", long.class)), is(false));
+		assertThat(isConstructor(method("newMethods")), is(true));
+		assertThat(isConstructor(method("newMethods", String.class)), is(true));
+		assertThat(isConstructor(method("notNewMethods")), is(false));
+		assertThat(isConstructor(method("newMethods", int.class)), is(false));
+		assertThat(isConstructor(method("newMethods", long.class)), is(false));
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class SignatureUtilTest {
 		assertEquals(propertyTypeOf(method("setSetter", String.class)), String.class);
 		assertEquals(propertyTypeOf(method("getGetter")), String.class);
 		assertEquals(propertyTypeOf(method("isBooleanGetter")), boolean.class);
-		assertNull(propertyTypeOf(method("create")));
+		assertNull(propertyTypeOf(method("newMethods")));
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class SignatureUtilTest {
 		assertThat(propertyAnnotationsOf(method("isBooleanGetter")), arrayWithSize(0));
 		assertThat(propertyAnnotationsOf(method("setConverted", Object.class)), arrayWithSize(1));
 		assertThat(propertyAnnotationsOf(method("getConverted")), arrayWithSize(1));
-		assertThat(propertyAnnotationsOf(method("create")), nullValue());
+		assertThat(propertyAnnotationsOf(method("newMethods")), nullValue());
 	}
 
 	@Test
@@ -168,15 +168,15 @@ public class SignatureUtilTest {
 
 	interface Methods {
 
-		Object create();
+		Methods newMethods();
 
-		Object create(String s);
+		Methods newMethods(String s);
 
-		void create(int i);
+		void newMethods(int i);
 
-		long create(long l);
+		long newMethods(long l);
 
-		Object notcreate();
+		Methods notNewMethods();
 
 		boolean isBooleanGetter();
 

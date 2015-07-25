@@ -1,10 +1,10 @@
 package com.almondtools.xrayinterface;
 
-import static com.almondtools.xrayinterface.BindingType.AUTO;
-import static com.almondtools.xrayinterface.BindingType.CONSTRUCTOR;
-import static com.almondtools.xrayinterface.BindingType.GET;
-import static com.almondtools.xrayinterface.BindingType.METHOD;
-import static com.almondtools.xrayinterface.BindingType.SET;
+import static com.almondtools.xrayinterface.BindingQualifier.AUTO;
+import static com.almondtools.xrayinterface.BindingQualifier.CONSTRUCTOR;
+import static com.almondtools.xrayinterface.BindingQualifier.GET;
+import static com.almondtools.xrayinterface.BindingQualifier.METHOD;
+import static com.almondtools.xrayinterface.BindingQualifier.SET;
 import static com.almondtools.xrayinterface.FixedType.VOID;
 import static java.util.Arrays.asList;
 
@@ -12,22 +12,22 @@ import java.util.List;
 
 public class BindingSignature {
 
-	public BindingType type;
+	public BindingQualifier qualifier;
 	public String name;
 	public Type result;
 	public Type[] params;
 	public Type[] exceptions;
 	
 	public BindingSignature() {
-		this(AUTO,"");
-	}
-	
-	public BindingSignature(String name) {
-		this(AUTO, name);
+		this("", AUTO);
 	}
 
-	public BindingSignature(BindingType type, String name) {
-		this.type = type;
+	public BindingSignature(String name) {
+		this(name, AUTO);
+	}
+	
+	public BindingSignature(String name, BindingQualifier qualifier) {
+		this.qualifier = qualifier;
 		this.name = name;
 		this.result = VOID;
 		this.params = new Type[0];
@@ -38,11 +38,11 @@ public class BindingSignature {
 		return name != null && !"".equals(name);
 	}
 
-	public List<BindingType> types() {
-		if (type == AUTO) {
-			return asList(METHOD, CONSTRUCTOR,GET,SET);
+	public List<BindingQualifier> types() {
+		if (qualifier == AUTO) {
+			return asList(CONSTRUCTOR, METHOD, GET,SET);
 		} else {
-			return asList(type);
+			return asList(qualifier);
 		}
 	}
 
