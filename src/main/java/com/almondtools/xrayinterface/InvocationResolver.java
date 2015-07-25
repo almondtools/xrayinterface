@@ -277,9 +277,9 @@ public class InvocationResolver {
 		try {
 			MethodHandle getter = lookup.unreflectSetter(field);
 			if (isStatic(field.getModifiers())) {
-				return new StaticSetter(getter, convertedPropertyType);
+				return new StaticSetter(field.getName(), getter, convertedPropertyType);
 			} else {
-				return new FieldSetter(getter, convertedPropertyType);
+				return new FieldSetter(field.getName(), getter, convertedPropertyType);
 			}
 		} catch (IllegalAccessException e) {
 			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
@@ -295,9 +295,9 @@ public class InvocationResolver {
 		try {
 			MethodHandle getter = lookup.unreflectGetter(field);
 			if (isStatic(field.getModifiers())) {
-				return new StaticGetter(getter, convertedPropertyType).asMethodInvocationHandler();
+				return new StaticGetter(field.getName(), getter, convertedPropertyType).asMethodInvocationHandler();
 			} else {
-				return new FieldGetter(getter, convertedPropertyType);
+				return new FieldGetter(field.getName(), getter, convertedPropertyType);
 			}
 		} catch (IllegalAccessException e) {
 			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
@@ -334,9 +334,9 @@ public class InvocationResolver {
 		try {
 			MethodHandle methodHandle = lookup.unreflect(method);
 			if (isStatic(method.getModifiers())) {
-				return new StaticMethodInvoker(methodHandle, result.convertedType(), convertedTypes(params));
+				return new StaticMethodInvoker(method.getName(), methodHandle, result.convertedType(), convertedTypes(params));
 			} else {
-				return new MethodInvoker(methodHandle, result.convertedType(), convertedTypes(params));
+				return new MethodInvoker(method.getName(), methodHandle, result.convertedType(), convertedTypes(params));
 			}
 		} catch (IllegalAccessException e) {
 			throw new NoSuchMethodException(method.getName() + " is not accessible. Check your security manager.");

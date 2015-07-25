@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
  */
 public class FieldGetter implements MethodInvocationHandler {
 
+	private String name;
 	private MethodHandle getter;
 	private Class<?> target;
 
@@ -18,7 +19,8 @@ public class FieldGetter implements MethodInvocationHandler {
 	 * 
 	 * @param getter the getter method handle for the field to access
 	 */
-	public FieldGetter(MethodHandle getter) {
+	public FieldGetter(String name, MethodHandle getter) {
+		this.name = name;
 		this.getter = getter;
 	}
 
@@ -30,11 +32,23 @@ public class FieldGetter implements MethodInvocationHandler {
 	 * @param target the target signature (target result)
 	 * @see Convert
 	 */
-	public FieldGetter(MethodHandle getter, Class<?> target) {
-		this(getter);
+	public FieldGetter(String name, MethodHandle getter, Class<?> target) {
+		this(name, getter);
 		this.target = target;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
+	public Class<?> getResultType() {
+		return getter.type().returnType();
+	}
+	
+	public Class<?> getTarget() {
+		return target;
+	}
+	
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args != null && args.length != 0) {

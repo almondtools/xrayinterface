@@ -12,28 +12,40 @@ import java.lang.reflect.Method;
  */
 public class MethodInvoker implements MethodInvocationHandler {
 
+	private String name;
 	private MethodHandle method;
 	private Class<?>[] targetParameterTypes;
 	private Class<?> targetReturnType;
 
-	/**
-	 * Invokes the given method
-	 * @param method the method to invoke
-	 */
-	public MethodInvoker(MethodHandle method) {
+	public MethodInvoker(String name, MethodHandle method) {
+		this.name = name;
 		this.method = method;
 	}
 
 	/**
 	 * Invokes a given method. Beyond {@link #MethodInvoker(Method)} this constructor also converts the method signature
+	 * @param name the name of the method
 	 * @param method the method to invoke
-	 * @param target the target signature (source arguments, target result)
+	 * @param targetReturnType the return type the result of the actual invocation should be converted to
+	 * @param targetParameterTypes the types the parameters should be converted from
 	 * @see Convert
 	 */
-	public MethodInvoker(MethodHandle method, Class<?> targetReturnType, Class<?>[] targetParameterTypes) {
-		this(method);
+	public MethodInvoker(String name, MethodHandle method, Class<?> targetReturnType, Class<?>[] targetParameterTypes) {
+		this(name, method);
 		this.targetReturnType = targetReturnType;
 		this.targetParameterTypes = targetParameterTypes;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Class<?>[] getTargetParameterTypes() {
+		return targetParameterTypes;
+	}
+	
+	public Class<?> getTargetReturnType() {
+		return targetReturnType;
 	}
 
 	@Override

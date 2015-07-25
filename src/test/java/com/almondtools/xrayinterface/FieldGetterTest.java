@@ -29,56 +29,66 @@ public class FieldGetterTest {
 	}
 
 	@Test
+	public void testGetName() throws Exception {
+		assertThat(new FieldGetter("field", null).getName(), equalTo("field"));
+	}
+
+	@Test
+	public void testGetResultType() throws Exception {
+		assertThat(new FieldGetter("field", getterFor(WithField.class, "field")).getResultType(), equalTo(String.class));
+	}
+
+	@Test
 	public void testGetField() throws Throwable {
-		Object result = new FieldGetter(getterFor(WithField.class, "field")).invoke(new WithField(), new Object[0]);
+		Object result = new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), new Object[0]);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetFieldWithFailingSignatureOne() throws Throwable {
-		new FieldGetter(getterFor(WithField.class, "field")).invoke(new WithField(), new Object[] { 1 });
+		new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), new Object[] { 1 });
 	}
 
 	@Test
 	public void testGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new FieldGetter(getterFor(WithField.class, "field")).invoke(new WithField(), (Object[]) null);
+		Object result = new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), (Object[]) null);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test
 	public void testConvertingGetField() throws Throwable {
-		Object result = new FieldGetter(getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
 		assertThat(result, instanceOf(ConvertingInterface.class));
 		assertThat(((ConvertingInterface) result).getContent(), equalTo("world"));
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testConvertingGetFieldContravariant() throws Throwable {
-		new FieldGetter(getterFor(ConvertibleWithField.class, "field"), ContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+		new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
 	}
 
 	@Test
 	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
-		Object result = new FieldGetter(getterFor(ConvertibleWithField.class, "field"), ConvertedContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertedContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
 		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
 		assertThat(((ConvertedContravariantInterface) result).getContent().toString(), equalTo("world"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConvertingGetFieldWithFailingSignatureOne() throws Throwable {
-		new FieldGetter(getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[] { 1 });
+		new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[] { 1 });
 	}
 
 	@Test
 	public void testConvertingGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new FieldGetter(getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), (Object[]) null);
+		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), (Object[]) null);
 		assertThat(result, instanceOf(ConvertingInterface.class));
 		assertThat(((ConvertingInterface) result).getContent(), equalTo("world"));
 	}
 
 	@Test
 	public void testConvertingGetFieldNonConvertible() throws Throwable {
-		Object result = new FieldGetter(getterFor(ConvertibleWithField.class, "other"), String.class).invoke(new ConvertibleWithField(), new Object[0]);
+		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "other"), String.class).invoke(new ConvertibleWithField(), new Object[0]);
 		assertThat(result, equalTo((Object) "hello"));
 	}
 

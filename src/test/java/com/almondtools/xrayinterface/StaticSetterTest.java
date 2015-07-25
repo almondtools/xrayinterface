@@ -13,10 +13,6 @@ import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.Convert;
-import com.almondtools.xrayinterface.StaticGetter;
-import com.almondtools.xrayinterface.StaticSetter;
-
 public class StaticSetterTest {
 
 	private Lookup lookup;
@@ -39,51 +35,61 @@ public class StaticSetterTest {
 	}
 
 	@Test
+	public void testGetName() throws Exception {
+		assertThat(new StaticSetter("field", null).getName(), equalTo("field"));
+	}
+
+	@Test
+	public void testGetResultType() throws Exception {
+		assertThat(new StaticSetter("field", setterFor(WithField.class, "field")).getType(), equalTo(String.class));
+	}
+
+	@Test
 	public void testSetField() throws Throwable {
-		Object result = new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello" });
+		Object result = new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithField.field, equalTo("hello"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNone() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[0]);
+		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[0]);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, (Object[]) null);
+		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignature2() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello", "world" });
+		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello", "world" });
 	}
 
 	@Test(expected = ClassCastException.class)
 	public void testSetFieldWithoutMatchingType() throws Throwable {
-		new StaticSetter(setterFor(WithField.class,"field")).invoke(null, new Object[] { Integer.valueOf(1) });
+		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { Integer.valueOf(1) });
 	}
 
 	@Test
 	public void testSetStaticFinalField() throws Throwable {
-		Object result = new StaticSetter(setterFor(WithStaticFinalField.class,"RUNTIME")).invoke(null, new Object[] { "hello" });
+		Object result = new StaticSetter("RUNTIME", setterFor(WithStaticFinalField.class,"RUNTIME")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithStaticFinalField.RUNTIME, equalTo("hello"));
 	}
 
 	@Test
 	public void testSetStaticFinalFieldCompileTime() throws Throwable {
-		Object voidresult = new StaticSetter(setterFor(WithStaticFinalField.class,"COMPILETIME")).invoke(null, new Object[] { "hello" });
+		Object voidresult = new StaticSetter("COMPILETIME", setterFor(WithStaticFinalField.class,"COMPILETIME")).invoke(null, new Object[] { "hello" });
 		assertThat(voidresult, nullValue());
 		assertThat(WithStaticFinalField.COMPILETIME, equalTo("ABC"));// paradox in source code, effect of inlining (see byte code of this line)
-		Object result = new StaticGetter(getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[0]);
+		Object result = new StaticGetter("COMPILETIME", getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[0]);
 		assertThat(result, equalTo((Object) "hello"));
 	}
 
 	@Test
 	public void testInvokeWithArgumentConversion() throws Throwable {
-		StaticSetter staticMethod = new StaticSetter(setterFor(WithConvertedProperty.class,"converted"), ConvertedInterface.class);
+		StaticSetter staticMethod = new StaticSetter("converted", setterFor(WithConvertedProperty.class,"converted"), ConvertedInterface.class);
 		staticMethod.invoke(null, new ConvertedInterface() {
 		});
 		assertThat(WithConvertedProperty.converted, notNullValue());

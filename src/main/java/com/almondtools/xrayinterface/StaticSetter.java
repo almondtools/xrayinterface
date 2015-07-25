@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class StaticSetter implements MethodInvocationHandler {
 
+	private String name;
 	private MethodHandle setter;
 	private Class<?> target;
 
@@ -22,7 +23,8 @@ public class StaticSetter implements MethodInvocationHandler {
 	 * 
 	 * @param setter the setter method handle for the the field to access
 	 */
-	public StaticSetter(MethodHandle setter) {
+	public StaticSetter(String name, MethodHandle setter) {
+		this.name = name;
 		this.setter = setter;
 	}
 
@@ -33,9 +35,21 @@ public class StaticSetter implements MethodInvocationHandler {
 	 * @param target the target signature (source arguments)
 	 * @see Convert
 	 */
-	public StaticSetter(MethodHandle setter, Class<?> target) {
-		this(setter);
+	public StaticSetter(String name, MethodHandle setter, Class<?> target) {
+		this(name, setter);
 		this.target = target;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public Class<?> getType() {
+		return setter.type().parameterType(0);
+	}
+	
+	public Class<?> getTarget() {
+		return target;
 	}
 
 	@Override

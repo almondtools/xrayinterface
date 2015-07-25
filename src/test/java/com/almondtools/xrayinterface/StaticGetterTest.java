@@ -28,38 +28,48 @@ public class StaticGetterTest {
 	}
 
 	@Test
+	public void testGetName() throws Exception {
+		assertThat(new StaticGetter("field", null).getName(), equalTo("field"));
+	}
+
+	@Test
+	public void testGetResultType() throws Exception {
+		assertThat(new StaticGetter("field", getterFor(WithField.class, "field")).getResultType(), equalTo(String.class));
+	}
+
+	@Test
 	public void testGetField() throws Throwable {
-		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke(null, new Object[0]);
+		Object result = new StaticGetter("field", getterFor(WithField.class, "field")).invoke(null, new Object[0]);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetFieldWithFailingSignatureOne() throws Throwable {
-		new StaticGetter(getterFor(WithField.class, "field")).invoke(null, new Object[] { 1 });
+		new StaticGetter("field", getterFor(WithField.class, "field")).invoke(null, new Object[] { 1 });
 	}
 
 	@Test
 	public void testGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new StaticGetter(getterFor(WithField.class, "field")).invoke(null, (Object[]) null);
+		Object result = new StaticGetter("field", getterFor(WithField.class, "field")).invoke(null, (Object[]) null);
 		assertThat((String) result, equalTo("world"));
 	}
 
 	@Test
 	public void testInvokeWithResultConversion() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ConvertedInterface.class);
+		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ConvertedInterface.class);
 		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testConvertingGetFieldContravariant() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ContravariantInterface.class);
+		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ContravariantInterface.class);
 		staticMethod.invoke(null);
 	}
 
 	@Test
 	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter(getterFor(WithConvertedProperty.class, "converted"), ConvertedContravariantInterface.class);
+		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ConvertedContravariantInterface.class);
 		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
 		assertThat(((ConvertedContravariantInterface) result).getOther().toString(), equalTo("other"));

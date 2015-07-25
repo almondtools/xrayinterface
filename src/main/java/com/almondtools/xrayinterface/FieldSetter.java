@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class FieldSetter implements MethodInvocationHandler {
 
+	private String name;
 	private MethodHandle setter;
 	private Class<?> target;
 
@@ -18,7 +19,8 @@ public class FieldSetter implements MethodInvocationHandler {
 	 * Sets a value on the given field.
 	 * @param setter the setter method handle for the field to access
 	 */
-	public FieldSetter(MethodHandle setter) {
+	public FieldSetter(String name, MethodHandle setter) {
+		this.name = name;
 		this.setter = setter;
 	}
 	
@@ -28,11 +30,23 @@ public class FieldSetter implements MethodInvocationHandler {
 	 * @param target the target signature (source arguments)
 	 * @see Convert 
 	 */
-	public FieldSetter(MethodHandle setter, Class<?> target) {
-		this(setter);
+	public FieldSetter(String name, MethodHandle setter, Class<?> target) {
+		this(name, setter);
 		this.target = target;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
+	public Class<?> getType() {
+		return setter.type().parameterType(1);
+	}
+
+	public Class<?> getTarget() {
+		return target;
+	}
+	
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args == null || args.length != 1) {
