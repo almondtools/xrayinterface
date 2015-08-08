@@ -5,8 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.MethodInvocationHandler;
-
 
 public class MethodInvocationHandlerTest  {
 

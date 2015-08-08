@@ -12,7 +12,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ObjectAccessTest {
+public class XRayInterfaceTest {
 
 	private LockedObject object;
 
@@ -34,7 +34,7 @@ public class ObjectAccessTest {
 
 	@Test
 	public void testMethodInvocation() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		assertThat(unlocked.myMethod("123", true), equalTo(123));
 		assertThat(unlocked.myMethod("123", false), equalTo(0));
 		assertThat(unlocked.myMethod("ABC", false), equalTo(0));
@@ -42,7 +42,7 @@ public class ObjectAccessTest {
 
 	@Test
 	public void testMethodInvocationWithBindingAnnotations() throws Exception {
-		UnlockedWithBindingAnnotationsObject unlocked = ObjectAccess.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
+		UnlockedWithBindingAnnotationsObject unlocked = XRayInterface.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
 		assertThat(unlocked.method("123", true), equalTo(123));
 		assertThat(unlocked.method("123", false), equalTo(0));
 		assertThat(unlocked.method("ABC", false), equalTo(0));
@@ -50,7 +50,7 @@ public class ObjectAccessTest {
 
 	@Test
 	public void testSetGetField() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		unlocked.setMyField("123");
 		assertThat(object.myPublicMethod(), equalTo(123));
 		assertThat(unlocked.getMyField(), equalTo("123"));
@@ -62,7 +62,7 @@ public class ObjectAccessTest {
 
 	@Test
 	public void testSetGetFieldWithBindingAnnotations() throws Exception {
-		UnlockedWithBindingAnnotationsObject unlocked = ObjectAccess.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
+		UnlockedWithBindingAnnotationsObject unlocked = XRayInterface.xray(object).to(UnlockedWithBindingAnnotationsObject.class);
 		unlocked.set("123");
 		assertThat(object.myPublicMethod(), equalTo(123));
 		assertThat(unlocked.get(), equalTo("123"));
@@ -75,7 +75,7 @@ public class ObjectAccessTest {
 	@Test
 	public void testNotExistingMethodInvocation() throws Exception {
 		try {
-			UnlockedNotMatchingMethodObject unlocked = ObjectAccess.xray(object).to(UnlockedNotMatchingMethodObject.class);
+			UnlockedNotMatchingMethodObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingMethodObject.class);
 			unlocked.notExistingMethod();
 		} catch (InterfaceMismatchException e) {
 			assertThat(e.toString(), containsString("notExistingMethod"));
@@ -85,7 +85,7 @@ public class ObjectAccessTest {
 	@Test
 	public void testNotExistingGetter() throws Exception {
 		try {
-			UnlockedNotMatchingGetterObject unlocked = ObjectAccess.xray(object).to(UnlockedNotMatchingGetterObject.class);
+			UnlockedNotMatchingGetterObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingGetterObject.class);
 			unlocked.getNotExisting();
 		} catch (InterfaceMismatchException e) {
 			assertThat(e.toString(), containsString("getNotExisting"));
@@ -95,7 +95,7 @@ public class ObjectAccessTest {
 	@Test
 	public void testNotExistingSetter() throws Exception {
 		try {
-			UnlockedNotMatchingSetterObject unlocked = ObjectAccess.xray(object).to(UnlockedNotMatchingSetterObject.class);
+			UnlockedNotMatchingSetterObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingSetterObject.class);
 			unlocked.setNotExisting(true);
 		} catch (InterfaceMismatchException e) {
 			assertThat(e.toString(), containsString("setNotExisting"));
@@ -104,20 +104,20 @@ public class ObjectAccessTest {
 
 	@Test
 	public void testSuperClassAccessForMethods() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		assertThat(unlocked.superMethod(), equalTo(5.0));
 	}
 
 	@Test
 	public void testSuperClassAccessForProperties() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		unlocked.setSuperField(1.0);
 		assertThat(unlocked.getSuperField(), equalTo(1.0));
 	}
 
 	@Test
 	public void testCorrectExceptionSignature() throws Exception {
-		UnlockedWithCorrectExceptions unlocked = ObjectAccess.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithCorrectExceptions.class);
+		UnlockedWithCorrectExceptions unlocked = XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithCorrectExceptions.class);
 		try {
 			String msg = unlocked.myMethod(null);
 			fail("expected io exception, but found: " + msg);
@@ -128,24 +128,24 @@ public class ObjectAccessTest {
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testMissingExceptionSignature() throws Exception {
-		ObjectAccess.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithMissingExceptions.class);
+		XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithMissingExceptions.class);
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testFalseExceptionSignature() throws Exception {
-		ObjectAccess.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithFalseExceptions.class);
+		XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithFalseExceptions.class);
 	}
 
 	@Test
 	public void testFinalGetSet() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		unlocked.setInteger(-2);
 		assertThat(unlocked.getInteger(), equalTo(-2));
 	}
 
 	@Test
 	public void testFinalSetAfterGet() throws Exception {
-		UnlockedObject unlocked = ObjectAccess.xray(object).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
 		int result = unlocked.getInteger();
 		unlocked.setInteger(-2);
 		unlocked.setInteger(result);

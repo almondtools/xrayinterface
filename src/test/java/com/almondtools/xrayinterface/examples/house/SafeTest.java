@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.ObjectAccess;
+import com.almondtools.xrayinterface.XRayInterface;
 
 
 public class SafeTest {
@@ -52,7 +52,7 @@ public class SafeTest {
 
 	@Test
 	public void testLockpicker() throws Exception {
-		TransparentSafe transparentSafe = ObjectAccess.xray(safe).to(TransparentSafe.class);
+		TransparentSafe transparentSafe = XRayInterface.xray(safe).to(TransparentSafe.class);
 		Item item = transparentSafe.getItems().remove(0);
 		assertThat(item, instanceOf(Diamond.class));
 		assertThat(transparentSafe.isLocked(), is(true));

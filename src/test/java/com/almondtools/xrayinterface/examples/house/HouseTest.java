@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.almondtools.xrayinterface.IsEquivalent;
-import com.almondtools.xrayinterface.ObjectAccess;
+import com.almondtools.xrayinterface.XRayInterface;
 
 public class HouseTest {
 
@@ -51,7 +51,7 @@ public class HouseTest {
 
 	@Test
 	public void testLockpicker() throws Exception {
-		XRayHouse xrayHouse = ObjectAccess.xray(house).to(XRayHouse.class);
+		XRayHouse xrayHouse = XRayInterface.xray(house).to(XRayHouse.class);
 		xrayHouse.open();
 		List<Furniture> furniture = house.listFurniture();
 		assertThat(furniture, contains(instanceOf(Safe.class)));
@@ -59,7 +59,7 @@ public class HouseTest {
 
 	@Test
 	public void testAquiringHousekey() throws Exception {
-		XRayHouseWithKeyGetter xrayHouse = ObjectAccess.xray(house).to(XRayHouseWithKeyGetter.class);
+		XRayHouseWithKeyGetter xrayHouse = XRayInterface.xray(house).to(XRayHouseWithKeyGetter.class);
 		key = xrayHouse.getHouseKey();
 		house.open(key);
 		List<Furniture> furniture = house.listFurniture();
@@ -68,7 +68,7 @@ public class HouseTest {
 
 	@Test
 	public void testChangingLock() throws Exception {
-		XRayHouseWithKeySetter xrayHouse = ObjectAccess.xray(house).to(XRayHouseWithKeySetter.class);
+		XRayHouseWithKeySetter xrayHouse = XRayInterface.xray(house).to(XRayHouseWithKeySetter.class);
 		xrayHouse.setHouseKey(key);
 		house.open(key);
 		List<Furniture> furniture = house.listFurniture();

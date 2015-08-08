@@ -10,8 +10,6 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.ObjectAccess;
-
 
 public class ConverterTest {
 
@@ -56,7 +54,7 @@ public class ConverterTest {
 		Method method = staticSimpleObjectMethod();
 		Method target = interfaceSimpleObjectMethod();
 		SimpleObject val = SimpleObject.build("value");
-		assertThat(convertArguments(target.getParameterTypes(), method.getParameterTypes(), ObjectAccess.xray(val).to(SimpleObjectInterface.class)), equalTo(new Object[] { val }));
+		assertThat(convertArguments(target.getParameterTypes(), method.getParameterTypes(), XRayInterface.xray(val).to(SimpleObjectInterface.class)), equalTo(new Object[] { val }));
 	}
 
 	private Method staticLongMethod() throws NoSuchMethodException {

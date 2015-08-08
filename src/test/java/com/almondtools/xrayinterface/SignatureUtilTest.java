@@ -29,8 +29,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.Convert;
-
 public class SignatureUtilTest {
 
 	@Test

@@ -5,8 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.ClassAccess;
-import com.almondtools.xrayinterface.ObjectAccess;
+import com.almondtools.xrayinterface.XRayInterface;
 
 
 public class TheOneAndOnlyTest {
@@ -14,22 +13,22 @@ public class TheOneAndOnlyTest {
 	@Test
 	public void testDirectSingletonModification() throws Exception {
 		TheOneAndOnly instance = TheOneAndOnly.getInstance();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		assertThat(instance.isUnique(), is(false));
 	}
 	
 	@Test
 	public void testSingletonFactoryIntrusion() throws Exception {
-		TheOneAndOnly instance = ClassAccess.xray(TheOneAndOnly.class).to(XRayedStatic.class).getInstance();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		TheOneAndOnly instance = XRayInterface.xray(TheOneAndOnly.class).to(XRayedStatic.class).getInstance();
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		assertThat(TheOneAndOnly.getInstance().isUnique(), is(false));
 	}
 	
 	@Test
 	public void testSingletonInjection() throws Exception {
-		XRayedStaticWithConstructor xrayedOneAndOnly = ClassAccess.xray(TheOneAndOnly.class).to(XRayedStaticWithConstructor.class);
+		XRayedStaticWithConstructor xrayedOneAndOnly = XRayInterface.xray(TheOneAndOnly.class).to(XRayedStaticWithConstructor.class);
 		TheOneAndOnly instance = xrayedOneAndOnly.newTheOneAndOnly();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		xrayedOneAndOnly.setInstance(instance);
 		assertThat(TheOneAndOnly.getInstance().isUnique(), is(false));
 	}

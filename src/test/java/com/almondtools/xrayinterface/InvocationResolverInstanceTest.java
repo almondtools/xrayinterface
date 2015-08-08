@@ -3,19 +3,13 @@ package com.almondtools.xrayinterface;
 import static com.almondtools.xrayinterface.ConvertedType.converted;
 import static com.almondtools.xrayinterface.FixedType.VOID;
 import static com.almondtools.xrayinterface.FixedType.fixed;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 import org.junit.Test;
-
-import com.almondtools.xrayinterface.Convert;
-import com.almondtools.xrayinterface.InvocationResolver;
 
 @SuppressWarnings("unused")
 public class InvocationResolverInstanceTest {

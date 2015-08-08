@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * ObjectAccess is a Decorator for any object that should get a new public interface. Usage:
+ * XRay is a Decorator for any object that should get a new public interface. Usage:
  * 
  * <p>
  * <code>InterfaceOfTheDecorator unlocked = ObjectAccess.xray(object).to(InterfaceOfTheDecorator.class);</code>
@@ -69,15 +70,20 @@ import java.util.Set;
  * 
  * @author Stefan Mandel
  */
-public class ObjectAccess extends InvocationResolver implements InvocationHandler {
+public class XRayInterface extends InvocationResolver implements InvocationHandler {
 
 	private Map<Method, MethodInvocationHandler> methods;
 	private Object object;
 
-	public ObjectAccess(Object object) {
+	public XRayInterface(Object object) {
 		super(object.getClass());
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 		this.object = object;
+	}
+	
+	public XRayInterface(Class<?> clazz) {
+		super(clazz);
+		this.methods = new HashMap<Method, MethodInvocationHandler>();
 	}
 	
 	public Map<Method, MethodInvocationHandler> getInterfaceMethods() {
@@ -159,20 +165,12 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	 * @param type the class to unlock/decorate
 	 * @return the wrapped object
 	 */
-	public static ObjectAccess xray(Object object) {
-		return new ObjectAccess(object);
-	}
-
-	/**
-	 * wraps the given class. The result of this method is a {@link ObjectSnoop} object which enables the user to check if a wrapped object (of the given class)
-	 * could be target of a mapping from a specific interface. Note that a class (not an object) is wrapped, but the result will check the instance interface of this class
-	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link com.almondtools.xrayinterface.ClassAccess#check(Class<?>)}.
-	 * 
-	 * @param type the target class to check
-	 * @return the wrapped class
-	 */
-	public static ObjectSnoop check(Class<?> clazz) {
-		return new ObjectSnoop(clazz);
+	public static XRayInterface xray(Object object) {
+		if (object instanceof Class<?>) {
+			return new XRayInterface((Class<?>) object);
+		} else {
+			return new XRayInterface(object);
+		}
 	}
 
 	/**
@@ -204,10 +202,28 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 			}
 			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
 		} catch (NoSuchFieldException e) {
-			throw new InterfaceMismatchException("cannot resolve property " + e.getMessage() + " on " + object.getClass());
+			throw new InterfaceMismatchException("cannot resolve property " + e.getMessage() + " on " + getType());
 		} catch (NoSuchMethodException e) {
-			throw new InterfaceMismatchException("cannot resolve method/property " + e.getMessage() + " on " + object.getClass());
+			throw new InterfaceMismatchException("cannot resolve method/property " + e.getMessage() + " on " + getType());
 		}
+	}
+
+	/**
+	 * collects all methods of the given interface conflicting with the wrapped object
+	 * 
+	 * @param interfaceClazz the interface to check on conflicts
+	 * @return a list of methods conflicting
+	 */
+	public List<Method> unMappable(Class<?> interfaceClazz) {
+		List<Method> conflicts = new LinkedList<Method>();
+		for (Method method : interfaceClazz.getDeclaredMethods()) {
+			try {
+				findInvocationHandler(method);
+			} catch (NoSuchFieldException | NoSuchMethodException e) {
+				conflicts.add(method);
+			}
+		}
+		return conflicts;
 	}
 
 	@Override

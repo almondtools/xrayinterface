@@ -8,8 +8,6 @@ import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeMatcher;
 
-import com.almondtools.xrayinterface.ClassAccess;
-
 public class ClassUnlockableMatcher extends TypeSafeMatcher<Class<?>> {
 
 	private Class<?> interfaceClazz;
@@ -29,7 +27,7 @@ public class ClassUnlockableMatcher extends TypeSafeMatcher<Class<?>> {
 
 	@Override
 	protected void describeMismatchSafely(Class<?> item, Description mismatchDescription) {
-		List<Method> conflicts = ClassAccess.check(item).onConflicts(interfaceClazz);
+		List<Method> conflicts = XRayInterface.xray(item).unMappable(interfaceClazz);
 		if (!conflicts.isEmpty()) {
 			mismatchDescription
 			.appendText("cannot find following members in ")
@@ -72,7 +70,7 @@ public class ClassUnlockableMatcher extends TypeSafeMatcher<Class<?>> {
 
 	@Override
 	protected boolean matchesSafely(Class<?> item) {
-		return ClassAccess.check(item).onConflicts(interfaceClazz).isEmpty();
+		return XRayInterface.xray(item).unMappable(interfaceClazz).isEmpty();
 	}
 
 	private final class Signature implements SelfDescribing {

@@ -7,15 +7,15 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import com.almondtools.xrayinterface.Convert;
-import com.almondtools.xrayinterface.ObjectAccess;
 import com.almondtools.xrayinterface.InterfaceMismatchException;
+import com.almondtools.xrayinterface.XRayInterface;
 
 public class ExampleObjectTest {
 
 	@Test
 	public void testInnerStaticClassResult() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
-		UnlockedExampleObject unlockedExampleObject = ObjectAccess.xray(exampleObject).to(UnlockedExampleObject.class);
+		UnlockedExampleObject unlockedExampleObject = XRayInterface.xray(exampleObject).to(UnlockedExampleObject.class);
 		InnerStatic s = unlockedExampleObject.createInnerStatic();
 		assertThat(s.getState(), equalTo("state"));
 		assertThat(s.isBooleanState(), is(false));
@@ -24,7 +24,7 @@ public class ExampleObjectTest {
 	@Test
 	public void testInnerStaticClassArgument() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
-		UnlockedExampleObject unlockedExampleObject = ObjectAccess.xray(exampleObject).to(UnlockedExampleObject.class);
+		UnlockedExampleObject unlockedExampleObject = XRayInterface.xray(exampleObject).to(UnlockedExampleObject.class);
 		assertThat(unlockedExampleObject.useInnerStatic(new InnerStatic() {
 
 			@Override
@@ -62,19 +62,19 @@ public class ExampleObjectTest {
 	@Test(expected = InterfaceMismatchException.class)
 	public void testInnerStaticMappingExceptionOnResult() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
-		ObjectAccess.xray(exampleObject).to(UnlockedExampleExceptionResult.class);
+		XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionResult.class);
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testInnerStaticMappingExceptionOnParams() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
-		ObjectAccess.xray(exampleObject).to(UnlockedExampleExceptionParam.class);
+		XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionParam.class);
 	}
 
 	@Test
 	public void testInnerStaticRoundtrip() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
-		UnlockedExampleOther unlockedExampleObject = ObjectAccess.xray(exampleObject).to(UnlockedExampleOther.class);
+		UnlockedExampleOther unlockedExampleObject = XRayInterface.xray(exampleObject).to(UnlockedExampleOther.class);
 		InnerStaticOther s = unlockedExampleObject.createInnerStatic();
 		assertThat(unlockedExampleObject.useInnerStatic(s, ""), is(true));
 	}
@@ -82,14 +82,14 @@ public class ExampleObjectTest {
 	@Test
 	public void testInnerStaticGetter() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("stateForGetter");
-		UnlockedExampleGetSetter unlockedExampleObject = ObjectAccess.xray(exampleObject).to(UnlockedExampleGetSetter.class);
+		UnlockedExampleGetSetter unlockedExampleObject = XRayInterface.xray(exampleObject).to(UnlockedExampleGetSetter.class);
 		assertThat(unlockedExampleObject.getFieldInnerStatic().getState(), equalTo("stateForGetter"));
 	}
 
 	@Test
 	public void testInnerStaticSetter() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("stateForSetter");
-		UnlockedExampleGetSetter unlockedExampleObject = ObjectAccess.xray(exampleObject).to(UnlockedExampleGetSetter.class);
+		UnlockedExampleGetSetter unlockedExampleObject = XRayInterface.xray(exampleObject).to(UnlockedExampleGetSetter.class);
 		unlockedExampleObject.setFieldInnerStatic(new InnerStatic() {
 
 			@Override

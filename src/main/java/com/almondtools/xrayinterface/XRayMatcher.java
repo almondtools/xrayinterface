@@ -29,7 +29,7 @@ public class XRayMatcher extends TypeSafeMatcher<Class<?>> {
 
 	@Override
 	protected void describeMismatchSafely(Class<?> item, Description mismatchDescription) {
-		List<Method> conflicts = ObjectAccess.check(item).onConflicts(interfaceClazz);
+		List<Method> conflicts = XRayInterface.xray(item).unMappable(interfaceClazz);
 		if (!conflicts.isEmpty()) {
 			mismatchDescription
 				.appendText("cannot map following members in ")
@@ -49,7 +49,7 @@ public class XRayMatcher extends TypeSafeMatcher<Class<?>> {
 
 	@Override
 	protected boolean matchesSafely(Class<?> item) {
-		return ObjectAccess.check(item).onConflicts(interfaceClazz).isEmpty();
+		return XRayInterface.xray(item).unMappable(interfaceClazz).isEmpty();
 	}
 
 	private final class Signature implements SelfDescribing {

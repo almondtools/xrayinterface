@@ -86,7 +86,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		description.appendText("with properties ").appendValueList("", ", ", "", properties.entrySet());
 	}
 
-	private static final class ObjectAccessWith<S, T extends Matcher<S>> extends ObjectAccess {
+	private static final class ObjectAccessWith<S, T extends Matcher<S>> extends XRayInterface {
 		private ObjectAccessWith(Object object) {
 			super(object);
 		}

@@ -8,8 +8,6 @@ import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.XRayMatcher;
-
 public class XRayMatcherTest {
 
 	@Test

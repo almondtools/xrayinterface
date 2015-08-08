@@ -1,13 +1,13 @@
 package com.almondtools.xrayinterface.examples;
 
-import static com.almondtools.xrayinterface.ObjectAccess.xray;
+import static com.almondtools.xrayinterface.XRayInterface.xray;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.ClassAccess;
+import com.almondtools.xrayinterface.XRayInterface;
 
 public class RomanProviderTest {
 
@@ -59,7 +59,7 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateConstructor() throws Exception {
-		NumberProvider numberProvider = ClassAccess.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = XRayInterface.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.newRandomNumberProvider(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
@@ -80,10 +80,10 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticField() throws Exception {
-		NumberProvider numberProvider = ClassAccess.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = XRayInterface.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.newRandomNumberProvider(21);
-		ClassAccess.xray(RandomNumberProvider.class)
+		XRayInterface.xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.setINSTANCE(numberProvider);
 		RomanProvider decorator = new RomanProvider(RandomNumberProvider.getInstance());
@@ -93,7 +93,7 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticFinalField() throws Exception {
-		UnlockedReallyMeanNumberProvider bluePrint = ClassAccess
+		UnlockedReallyMeanNumberProvider bluePrint = XRayInterface
 				.xray(ReallyMeanNumberProvider.class)
 				.to(UnlockedReallyMeanNumberProvider.class);
 

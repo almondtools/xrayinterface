@@ -20,33 +20,33 @@ public class ClassAccessTest {
 
 	@Test
 	public void testConstructorInvocation() throws Exception {
-		UnlockedObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
 		assertThat(unlocked.newLockedObjectWithPrivateConstructor().getMyField(), equalTo("initialized"));
 	}
 
 	@Test
 	public void testConstructorInvocationWithBindingAnnotations() throws Exception {
-		UnlockedWithBindingAnnotationsObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
+		UnlockedWithBindingAnnotationsObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
 		assertThat(unlocked.construct().getMyField(), equalTo("initialized"));
 	}
 
 	@Test
 	public void testStaticInvocation() throws Exception {
-		UnlockedObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
 		unlocked.setDEFAULT(null);
 		assertThat(unlocked.reset().getMyField(), nullValue());
 	}
 
 	@Test
 	public void testStaticInvocationWithBindingAnnotations() throws Exception {
-		UnlockedWithBindingAnnotationsObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
+		UnlockedWithBindingAnnotationsObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
 		unlocked.set(null);
 		assertThat(unlocked.method().getMyField(), nullValue());
 	}
 
 	@Test
 	public void testStaticSetAfterGet() throws Exception {
-		UnlockedObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
 		String result = unlocked.getDEFAULT();
 		unlocked.setDEFAULT("");
 		unlocked.setDEFAULT(result);
@@ -55,7 +55,7 @@ public class ClassAccessTest {
 
 	@Test
 	public void testStaticSetGetWithBindingAnnotations() throws Exception {
-		UnlockedWithBindingAnnotationsObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
+		UnlockedWithBindingAnnotationsObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedWithBindingAnnotationsObject.class);
 		unlocked.set(null);
 		assertThat(unlocked.get(), nullValue());
 		unlocked.set("default");
@@ -65,12 +65,12 @@ public class ClassAccessTest {
 
 	@Test(expected = InterfaceMismatchException.class)
 	public void testWrongSignature() throws Exception {
-		ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedNotMatchingObject.class);
+		XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedNotMatchingObject.class);
 	}
 
 	@Test
 	public void testStaticSetGet() throws Exception {
-		UnlockedObject unlocked = ClassAccess.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
+		UnlockedObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedObject.class);
 		unlocked.setDEFAULT(null);
 		assertThat(unlocked.getDEFAULT(), nullValue());
 		unlocked.setDEFAULT("default");

@@ -94,7 +94,7 @@ public class Converter {
 		} else if (result == null) {
 			return null;
 		} else {
-			return ObjectAccess.xray(result).to(targetType);
+			return XRayInterface.xray(result).to(targetType);
 		}
 	}
 
@@ -118,12 +118,12 @@ public class Converter {
 		InvocationTargetException, SecurityException {
 		if (object instanceof Proxy) {
 			InvocationHandler invocationHandler = Proxy.getInvocationHandler((Proxy) object);
-			if (invocationHandler instanceof ObjectAccess) {
-				return ((ObjectAccess) invocationHandler).getObject();
+			if (invocationHandler instanceof XRayInterface) {
+				return ((XRayInterface) invocationHandler).getObject();
 			}
 		}
 		Object converted = createBaseObject(clazz, accessibleClass);
-		Object accessible = ObjectAccess.xray(converted).to(accessibleClass);
+		Object accessible = XRayInterface.xray(converted).to(accessibleClass);
 		for (Method[] getSetPair : findProperties(accessibleClass)) {
 			Method get = getSetPair[0];
 			get.setAccessible(true);
