@@ -29,9 +29,9 @@ public class FieldGetterTest {
 	}
 
 	@Test
-	public void testGetName() throws Exception {
-		assertThat(new FieldGetter("field", null).getName(), equalTo("field"));
-	}
+		public void testGetFieldName() throws Exception {
+			assertThat(new FieldGetter("field", null).getFieldName(), equalTo("field"));
+		}
 
 	@Test
 	public void testGetResultType() throws Exception {

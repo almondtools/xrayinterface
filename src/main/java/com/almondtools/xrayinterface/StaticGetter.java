@@ -10,32 +10,36 @@ import java.lang.reflect.Field;
  */
 public class StaticGetter implements MethodInvocationHandler {
 
-	private String name;
+	private String fieldName;
 	private MethodHandle getter;
 	private Class<?> target;
 
 	/**
 	 * Gets a value on the given field.
+	 * 
+	 * @param fieldName the name of the field to set
 	 * @param getter method handle for the field to access
 	 */
-	public StaticGetter(String name, MethodHandle getter) {
-		this.name = name;
+	public StaticGetter(String fieldName, MethodHandle getter) {
+		this.fieldName = fieldName;
 		this.getter = getter;
 	}
 
 	/**
 	 * Gets a value on the given field. Beyond {@link #StaticGetter(Class, Field)} this constructor also converts the result
+	 * 
+	 * @param fieldName the name of the field to set
 	 * @param getter method handle for the field to access
 	 * @param target the target signature (target result)
 	 * @see Convert 
 	 */
-	public StaticGetter(String name, MethodHandle getter, Class<?> target) {
-		this(name, getter);
+	public StaticGetter(String fieldName, MethodHandle getter, Class<?> target) {
+		this(fieldName, getter);
 		this.target = target;
 	}
 	
-	public String getName() {
-		return name;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	public Class<?> getResultType() {

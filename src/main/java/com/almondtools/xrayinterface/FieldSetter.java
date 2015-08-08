@@ -5,38 +5,43 @@ import static com.almondtools.xrayinterface.Converter.convertArgument;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
 
 /**
  * Wraps a field with modification (setter) access.
  */
 public class FieldSetter implements MethodInvocationHandler {
 
-	private String name;
+	private String fieldName;
 	private MethodHandle setter;
 	private Class<?> target;
 
 	/**
 	 * Sets a value on the given field.
+	 * 
+	 * @param fieldName the name of the field to set
 	 * @param setter the setter method handle for the field to access
 	 */
-	public FieldSetter(String name, MethodHandle setter) {
-		this.name = name;
+	public FieldSetter(String fieldName, MethodHandle setter) {
+		this.fieldName = fieldName;
 		this.setter = setter;
 	}
 	
 	/**
 	 * Sets a value on the given field. Beyond {@link #FieldSetter(Field)} this constructor also converts the argument
+	 * 
+	 * @param fieldName the name of the field to set
 	 * @param setter the setter method handle for the field to access
 	 * @param target the target signature (source arguments)
 	 * @see Convert 
 	 */
-	public FieldSetter(String name, MethodHandle setter, Class<?> target) {
-		this(name, setter);
+	public FieldSetter(String fieldName, MethodHandle setter, Class<?> target) {
+		this(fieldName, setter);
 		this.target = target;
 	}
 	
-	public String getName() {
-		return name;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	public Class<?> getType() {
@@ -65,6 +70,18 @@ public class FieldSetter implements MethodInvocationHandler {
 			return arg;
 		}
 		return convertArgument(target, setter.type().parameterType(1), arg);
+	}
+
+	public Object setSafely(Object object, Object value) {
+		return setSafely(object, value, ExceptionHandlers.RETURN_NULL);
+	}
+	
+	public Object setSafely(Object object, Object value, Function<Throwable, Object> handler) {
+		try {
+			return invoke(object, value);
+		} catch (Throwable e) {
+			return handler.apply(e);
+		}
 	}
 
 }

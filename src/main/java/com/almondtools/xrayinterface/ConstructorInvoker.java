@@ -35,6 +35,14 @@ public class ConstructorInvoker implements MethodInvocationHandler {
 		this.targetParameterTypes = targetParameterTypes;
 	}
 
+	public Class<?>[] getTargetParameterTypes() {
+		return targetParameterTypes;
+	}
+	
+	public Class<?> getTargetReturnType() {
+		return targetReturnType;
+	}
+
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
 		try {

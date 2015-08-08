@@ -22,8 +22,7 @@ public class ObjectSnoop extends InvocationResolver {
 	/**
 	 * collects all methods of the given interface conflicting with the wrapped object
 	 * 
-	 * @param interfaceClazz
-	 *            the interface to check on conflicts
+	 * @param interfaceClazz the interface to check on conflicts
 	 * @return a list of methods conflicting
 	 */
 	public List<Method> onConflicts(Class<?> interfaceClazz) {

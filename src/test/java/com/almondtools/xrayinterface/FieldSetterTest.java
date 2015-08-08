@@ -34,9 +34,9 @@ public class FieldSetterTest {
 	}
 
 	@Test
-	public void testGetName() throws Exception {
-		assertThat(new FieldSetter("field", null).getName(), equalTo("field"));
-	}
+		public void testGetFieldName() throws Exception {
+			assertThat(new FieldSetter("field", null).getFieldName(), equalTo("field"));
+		}
 
 	@Test
 	public void testGetResultType() throws Exception {

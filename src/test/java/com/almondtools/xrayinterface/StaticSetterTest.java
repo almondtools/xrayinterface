@@ -35,9 +35,9 @@ public class StaticSetterTest {
 	}
 
 	@Test
-	public void testGetName() throws Exception {
-		assertThat(new StaticSetter("field", null).getName(), equalTo("field"));
-	}
+		public void testGetFieldName() throws Exception {
+			assertThat(new StaticSetter("field", null).getFieldName(), equalTo("field"));
+		}
 
 	@Test
 	public void testGetResultType() throws Exception {

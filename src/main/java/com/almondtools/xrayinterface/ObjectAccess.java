@@ -1,11 +1,14 @@
 package com.almondtools.xrayinterface;
 
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,8 +80,73 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 		this.object = object;
 	}
 	
-	public Map<Method, MethodInvocationHandler> getMethods() {
+	public Map<Method, MethodInvocationHandler> getInterfaceMethods() {
 		return methods;
+	}
+	
+	public List<ConstructorInvoker> getConstructors() {
+		return methods.values().stream()
+			.filter(value -> value instanceof ConstructorInvoker)
+			.map(value -> (ConstructorInvoker) value)
+			.collect(toList());
+	}
+
+	public List<FieldProperty> getFieldProperties() {
+		Map<String, FieldProperty> properties = new LinkedHashMap<>();
+		for (FieldSetter setter : getFieldSetters()) {
+			String field = setter.getFieldName();
+			FieldProperty property = properties.computeIfAbsent(field, key -> new FieldProperty());
+			property.setSetter(setter);
+		}
+		for (FieldGetter getter : getFieldGetters()) {
+			String field = getter.getFieldName();
+			FieldProperty property = properties.computeIfAbsent(field, key -> new FieldProperty());
+			property.setGetter(getter);
+		}
+		return new ArrayList<>(properties.values());
+	}
+
+	public List<FieldSetter> getFieldSetters() {
+		return filteredMethods(FieldSetter.class);
+	}
+
+	public List<FieldGetter> getFieldGetters() {
+		return filteredMethods(FieldGetter.class);
+	}
+
+	public List<StaticProperty> getStaticProperties() {
+		return null;
+	}
+
+	public List<StaticSetter> getStaticSetters() {
+		return filteredMethods(StaticSetter.class);
+	}
+
+	public List<StaticGetter> getStaticGetters() {
+		return filteredMethods(StaticGetter.class);
+	}
+
+	public List<MethodInvoker> getMethods() {
+		return filteredMethods(MethodInvoker.class);
+	}
+
+	public List<StaticMethodInvoker> getStaticMethods() {
+		return filteredMethods(StaticMethodInvoker.class);
+	}
+
+	private <T> List<T> filteredMethods(Class<T> clazz) {
+		return methods.values().stream()
+			.filter(value -> clazz.isInstance(value))
+			.map(value -> clazz.cast(value))
+			.collect(toList());
+	}
+
+	public String methodName(MethodInvocationHandler m) {
+		return methods.entrySet().stream()
+			.filter(entry -> entry.getValue() == m)
+			.findFirst()
+			.map(method -> method.getKey().getName())
+			.orElse(null);
 	}
 
 	public Object getObject() {

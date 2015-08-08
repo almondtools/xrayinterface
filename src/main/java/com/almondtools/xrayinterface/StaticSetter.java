@@ -14,34 +14,36 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class StaticSetter implements MethodInvocationHandler {
 
-	private String name;
+	private String fieldName;
 	private MethodHandle setter;
 	private Class<?> target;
 
 	/**
 	 * Sets a value on the given field.
 	 * 
+	 * @param fieldName the name of the field to set
 	 * @param setter the setter method handle for the the field to access
 	 */
-	public StaticSetter(String name, MethodHandle setter) {
-		this.name = name;
+	public StaticSetter(String fieldName, MethodHandle setter) {
+		this.fieldName = fieldName;
 		this.setter = setter;
 	}
 
 	/**
 	 * Sets a value on the given field. Beyond {@link #StaticSetter(Class, Field)} this constructor also converts the argument
 	 * 
+	 * @param fieldName the name of the field to set
 	 * @param setter the setter method handle for the field to access
 	 * @param target the target signature (source arguments)
 	 * @see Convert
 	 */
-	public StaticSetter(String name, MethodHandle setter, Class<?> target) {
-		this(name, setter);
+	public StaticSetter(String fieldName, MethodHandle setter, Class<?> target) {
+		this(fieldName, setter);
 		this.target = target;
 	}
 	
-	public String getName() {
-		return name;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	public Class<?> getType() {

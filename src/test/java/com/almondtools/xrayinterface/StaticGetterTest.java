@@ -28,9 +28,9 @@ public class StaticGetterTest {
 	}
 
 	@Test
-	public void testGetName() throws Exception {
-		assertThat(new StaticGetter("field", null).getName(), equalTo("field"));
-	}
+		public void testGetFieldName() throws Exception {
+			assertThat(new StaticGetter("field", null).getFieldName(), equalTo("field"));
+		}
 
 	@Test
 	public void testGetResultType() throws Exception {
