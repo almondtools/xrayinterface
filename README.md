@@ -1,19 +1,19 @@
 XRayInterface
 =============
 
-YRayInterface is a convenient interface to Java reflection.
+XRayInterface is a convenient interface to Java reflection.
 
 * not depending on strings
 * but on interface conventions
 
-YRayInterface is easy to use:
+XRayInterface is easy to use:
 
 * determine which private fields or methods you are missing 
 * define the public interface you are missing
 * bind this interface with XRayInterface to the object you want to access
 
 
-eg. setting a private field `x` of your instance `foo`. Then define an interface:
+e.g. setting a private field `x` of your instance `foo`. Then define an interface:
 
     interface OpenFoo {
       void setX(String value);
@@ -21,7 +21,7 @@ eg. setting a private field `x` of your instance `foo`. Then define an interface
     
 and take an x-ray snapshot:
 
-     OpenFoo openFoo = ObjectAccess.xray(foo).to(OpenFoo.class);
+     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
      openFoo.setX("bar");
 
 or getting the value of some private field `y` of your instance `foo`. Then define an interface:
@@ -32,7 +32,7 @@ or getting the value of some private field `y` of your instance `foo`. Then defi
     
 and take an x-ray snapshot:
 
-     OpenFoo openFoo = ObjectAccess.xray(foo).to(OpenFoo.class);
+     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
      String bar = openFoo.getX();
 
 or making a simple private method `boolean m(int value)` of `foo` accessible. Then define an interface:
@@ -43,7 +43,7 @@ or making a simple private method `boolean m(int value)` of `foo` accessible. Th
     
 and take an x-ray snapshot:
 
-     OpenFoo openFoo = ObjectAccess.xray(foo).to(OpenFoo.class);
+     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
      int bar = openFoo.m("bar");
 
 You want to learn about the advantages of XRayInterface over pure Java reflection? Then see [here](XRayInterfaceVsJavaReflection.md).

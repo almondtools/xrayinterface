@@ -52,7 +52,7 @@ The xrayinterface style for example:
 
 ```Java
     public List<Furniture> open(House house) {
-		XRayHouse xRayHouse = ObjectAccess.xray(house).to(XRayHouse.class); // unlock interface
+		XRayHouse xRayHouse = XRayInterface.xray(house).to(XRayHouse.class); // unlock interface
 		xRayHouse.open(); // call unlocked method
 		return house.listFurniture();
 	}
@@ -73,7 +73,7 @@ For example:
 
 ```Java
     public List<Furniture> open(House house) throws NoSuchMethodException {
-		XrayHouse xRayHouse = ObjectAccess.xray(house).to(XrayHouse.class);
+		XrayHouse xRayHouse = XRayInterface.xray(house).to(XrayHouse.class);
 		Key key = xRayHouse.getHouseKey(); // aquire the private key
 		house.open(key); // execute the public method
 		return house.listFurniture();
@@ -93,7 +93,7 @@ For example:
 ```Java
     public List<Furniture> open(House house) throws NoSuchMethodException {
     	Key key = new Key();
-		XRayHouse xRayHouse = ObjectAccess.xray(house).to(XRayHouse.class);
+		XRayHouse xRayHouse = XRayInterface.xray(house).to(XRayHouse.class);
 		xRayHouse.setHouseKey(key);
 		house.open(key);
 		return house.listFurniture();

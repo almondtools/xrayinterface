@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class ClassAccessTest {
+public class XRayInterfaceStaticTest {
 
 	@Test
 	public void testXrayable() throws Exception {

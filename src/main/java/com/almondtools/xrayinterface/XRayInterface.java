@@ -15,10 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * XRay is a Decorator for any object that should get a new public interface. Usage:
+ * XRay is a Decorator for any object (or class) that should get a new public interface. Usage:
  * 
  * <p>
- * <code>InterfaceOfTheDecorator unlocked = ObjectAccess.xray(object).to(InterfaceOfTheDecorator.class);</code>
+ * <code>InterfaceOfTheDecorator unlocked = XRayInterface.xray(object).to(InterfaceOfTheDecorator.class);</code>
  * 
  * <p>
  * After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the xrayinterface conventions:

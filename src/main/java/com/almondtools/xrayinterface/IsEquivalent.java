@@ -24,7 +24,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 	}
 
 	public static <S, T extends Matcher<S>> T equivalentTo(Class<T> interfaceClazz) {
-		return new ObjectAccessWith<S, T>(new IsEquivalent<S, T>(interfaceClazz)).to(interfaceClazz);
+		return new XRayInterfaceWith<S, T>(new IsEquivalent<S, T>(interfaceClazz)).to(interfaceClazz);
 	}
 
 	protected MethodInvocationHandler handle(final String name) {
@@ -34,7 +34,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 			@Override
 			public Object invoke(Object object, Object... args) throws Throwable {
 				((IsEquivalent<S, T>) object).properties.put(name, args[0]);
-				return new ObjectAccessWith<S, T>(IsEquivalent.this).to(interfaceClazz);
+				return new XRayInterfaceWith<S, T>(IsEquivalent.this).to(interfaceClazz);
 			}
 		};
 	}
@@ -86,8 +86,8 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		description.appendText("with properties ").appendValueList("", ", ", "", properties.entrySet());
 	}
 
-	private static final class ObjectAccessWith<S, T extends Matcher<S>> extends XRayInterface {
-		private ObjectAccessWith(Object object) {
+	private static final class XRayInterfaceWith<S, T extends Matcher<S>> extends XRayInterface {
+		private XRayInterfaceWith(Object object) {
 			super(object);
 		}
 

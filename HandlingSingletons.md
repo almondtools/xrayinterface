@@ -42,7 +42,7 @@ We can of course directly modify the singleton with XRayInterface, e.g.
 	@Test
 	public void testDirectSingletonModification() throws Exception {
 		TheOneAndOnly instance = TheOneAndOnly.getInstance();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		assertThat(instance.isUnique(), is(false));
 	}
 	
@@ -60,8 +60,8 @@ Another way would be to access and change the static property instance.
 ```Java
 	@Test
 	public void testSingletonSingletonFactoryIntrusion() throws Exception {
-		TheOneAndOnly instance = ClassAccess.xray(TheOneAndOnly.class).to(XRayedStatic.class).getInstance();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		TheOneAndOnly instance = XRayInterface.xray(TheOneAndOnly.class).to(XRayedStatic.class).getInstance();
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		assertThat(TheOneAndOnly.getInstance().isUnique(), is(false));
 	}
 	
@@ -74,8 +74,8 @@ Another way would be to access and change the static property instance.
 	}
 ```
 
-To provide static properties, we have to use the class ClassAccess instead of ObjectAccess. The conventions for the interface are similar
-to the interfaces for ObjectAccess. Note that the interface has itself non-static methods, the accessed methods/properties are static.  
+To provide static properties, we have to use the class XRayInterface instead of XRayInterface. The conventions for the interface are similar
+to the interfaces for XRayInterface. Note that the interface has itself non-static methods, the accessed methods/properties are static.  
 
 Singleton Injection
 ===================
@@ -84,9 +84,9 @@ Now there is a third possibility - inject the correctly configured singleton. Th
 ```Java
 	@Test
 	public void testSingletonInjection() throws Exception {
-		XRayedStaticWithConstructor xRayedOneAndOnly = ClassAccess.xray(TheOneAndOnly.class).to(XRayedStaticWithConstructor.class);
+		XRayedStaticWithConstructor xRayedOneAndOnly = XRayInterface.xray(TheOneAndOnly.class).to(XRayedStaticWithConstructor.class);
 		TheOneAndOnly instance = xRayedOneAndOnly.create();
-		ObjectAccess.xray(instance).to(XRayed.class).setUnique(false);
+		XRayInterface.xray(instance).to(XRayed.class).setUnique(false);
 		XRayedOneAndOnly.setInstance(instance);
 		assertThat(TheOneAndOnly.getInstance().isUnique(), is(false));
 	}
@@ -101,4 +101,4 @@ Now there is a third possibility - inject the correctly configured singleton. Th
 	}
 ```
   
-As one can see we use the ClassAccess object to invoke the private constructor. Any interface method named create delegates to a constructor with a matching signature.
+As one can see we use the XRayInterface object to invoke the private constructor. Any interface method named create delegates to a constructor with a matching signature.

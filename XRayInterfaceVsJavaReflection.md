@@ -55,7 +55,7 @@ XRayInterface does not bother you with that boilerplate code:
 2. Then bind it:
 
     ```Java
-    Example example = ObjectAccess.xray(object).to(Example.class);
+    Example example = XRayInterface.xray(object).to(Example.class);
     ```
 3. And call it:
 
