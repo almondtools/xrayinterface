@@ -2,6 +2,7 @@ package com.almondtools.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.invoke.MethodHandle;
@@ -11,6 +12,8 @@ import java.lang.reflect.Field;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.almondtools.xrayinterface.StaticSetterTest.ConvertedInterface;
 
 @SuppressWarnings("unused")
 public class FieldGetterTest {
@@ -39,6 +42,16 @@ public class FieldGetterTest {
 	}
 
 	@Test
+	public void testGetTarget() throws Exception {
+		assertThat(new FieldGetter("field", getterFor(WithField.class, "field")).getTarget(), nullValue());
+	}
+
+	@Test
+	public void testGetTargetConverted() throws Exception {
+		assertThat(new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).getTarget(), equalTo(ConvertedInterface.class));
+	}
+
+	@Test
 	public void testGetField() throws Throwable {
 		Object result = new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), new Object[0]);
 		assertThat((String) result, equalTo("world"));
@@ -56,43 +69,51 @@ public class FieldGetterTest {
 	}
 
 	@Test
-	public void testConvertingGetField() throws Throwable {
-		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
-		assertThat(result, instanceOf(ConvertingInterface.class));
-		assertThat(((ConvertingInterface) result).getContent(), equalTo("world"));
-	}
-
-	@Test(expected = InterfaceMismatchException.class)
-	public void testConvertingGetFieldContravariant() throws Throwable {
-		new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+	public void testConvertedGetField() throws Throwable {
+		Object result = new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(new WithConvertedField(), new Object[0]);
+		assertThat(result, instanceOf(ConvertedInterface.class));
+		assertThat(((ConvertedInterface) result).getContent(), equalTo("world"));
 	}
 
 	@Test
-	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
-		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertedContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+	public void testConvertedGetFieldNull() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		object.field = null;
+		Object result = new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[0]);
+		assertThat(result, nullValue());
+	}
+
+	@Test(expected = InterfaceMismatchException.class)
+	public void testConvertedGetFieldContravariant() throws Throwable {
+		new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class).invoke(new WithConvertedField(), new Object[0]);
+	}
+
+	@Test
+	public void testConvertedGetFieldConvertedContravariant() throws Throwable {
+		Object result = new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedContravariantInterface.class).invoke(new WithConvertedField(), new Object[0]);
 		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
 		assertThat(((ConvertedContravariantInterface) result).getContent().toString(), equalTo("world"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConvertingGetFieldWithFailingSignatureOne() throws Throwable {
-		new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[] { 1 });
+	public void testConvertedGetFieldWithFailingSignatureOne() throws Throwable {
+		new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(new WithConvertedField(), new Object[] { 1 });
 	}
 
 	@Test
-	public void testConvertingGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), (Object[]) null);
-		assertThat(result, instanceOf(ConvertingInterface.class));
-		assertThat(((ConvertingInterface) result).getContent(), equalTo("world"));
+	public void testConvertedGetFieldWithFailingSignatureNull() throws Throwable {
+		Object result = new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(new WithConvertedField(), (Object[]) null);
+		assertThat(result, instanceOf(ConvertedInterface.class));
+		assertThat(((ConvertedInterface) result).getContent(), equalTo("world"));
 	}
 
 	@Test
-	public void testConvertingGetFieldNonConvertible() throws Throwable {
-		Object result = new FieldGetter("field", getterFor(ConvertibleWithField.class, "other"), String.class).invoke(new ConvertibleWithField(), new Object[0]);
+	public void testConvertedGetFieldNonConvertible() throws Throwable {
+		Object result = new FieldGetter("field", getterFor(WithConvertedField.class, "other"), String.class).invoke(new WithConvertedField(), new Object[0]);
 		assertThat(result, equalTo((Object) "hello"));
 	}
 
-	interface ConvertingInterface {
+	interface ConvertedInterface {
 		String getContent();
 	}
 
@@ -105,17 +126,17 @@ public class FieldGetterTest {
 		CharSequence getContent();
 	}
 
-	private static class ConvertibleWithField {
+	private static class WithConvertedField {
 
-		private String other = "hello";
-		private ConvertibleField field = new ConvertibleField("world");
+		public String other = "hello";
+		public ConvertedField field = new ConvertedField("world");
 	}
 
-	private static class ConvertibleField {
+	private static class ConvertedField {
 
 		private String content;
 
-		public ConvertibleField(String content) {
+		public ConvertedField(String content) {
 			this.content = content;
 		}
 

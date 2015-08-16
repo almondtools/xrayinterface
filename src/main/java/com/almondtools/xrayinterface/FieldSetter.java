@@ -5,7 +5,6 @@ import static com.almondtools.xrayinterface.Converter.convertArgument;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Function;
 
 /**
  * Wraps a field with modification (setter) access.
@@ -70,18 +69,6 @@ public class FieldSetter implements MethodInvocationHandler {
 			return arg;
 		}
 		return convertArgument(target, setter.type().parameterType(1), arg);
-	}
-
-	public Object setSafely(Object object, Object value) {
-		return setSafely(object, value, ExceptionHandlers.RETURN_NULL);
-	}
-	
-	public Object setSafely(Object object, Object value, Function<Throwable, Object> handler) {
-		try {
-			return invoke(object, value);
-		} catch (Throwable e) {
-			return handler.apply(e);
-		}
 	}
 
 }

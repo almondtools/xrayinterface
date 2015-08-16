@@ -35,9 +35,9 @@ public class StaticSetterTest {
 	}
 
 	@Test
-		public void testGetFieldName() throws Exception {
-			assertThat(new StaticSetter("field", null).getFieldName(), equalTo("field"));
-		}
+	public void testGetFieldName() throws Exception {
+		assertThat(new StaticSetter("field", null).getFieldName(), equalTo("field"));
+	}
 
 	@Test
 	public void testGetResultType() throws Exception {
@@ -45,42 +45,52 @@ public class StaticSetterTest {
 	}
 
 	@Test
+	public void testGetTarget() throws Exception {
+		assertThat(new StaticSetter("field", setterFor(WithField.class, "field")).getTarget(), nullValue());
+	}
+
+	@Test
+	public void testGetTargetConverted() throws Exception {
+		assertThat(new StaticSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).getTarget(), equalTo(ConvertedInterface.class));
+	}
+
+	@Test
 	public void testSetField() throws Throwable {
-		Object result = new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello" });
+		Object result = new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithField.field, equalTo("hello"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNone() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[0]);
+		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[0]);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, (Object[]) null);
+		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignature2() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { "hello", "world" });
+		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { "hello", "world" });
 	}
 
 	@Test(expected = ClassCastException.class)
 	public void testSetFieldWithoutMatchingType() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class,"field")).invoke(null, new Object[] { Integer.valueOf(1) });
+		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { Integer.valueOf(1) });
 	}
 
 	@Test
 	public void testSetStaticFinalField() throws Throwable {
-		Object result = new StaticSetter("RUNTIME", setterFor(WithStaticFinalField.class,"RUNTIME")).invoke(null, new Object[] { "hello" });
+		Object result = new StaticSetter("RUNTIME", setterFor(WithStaticFinalField.class, "RUNTIME")).invoke(null, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(WithStaticFinalField.RUNTIME, equalTo("hello"));
 	}
 
 	@Test
 	public void testSetStaticFinalFieldCompileTime() throws Throwable {
-		Object voidresult = new StaticSetter("COMPILETIME", setterFor(WithStaticFinalField.class,"COMPILETIME")).invoke(null, new Object[] { "hello" });
+		Object voidresult = new StaticSetter("COMPILETIME", setterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[] { "hello" });
 		assertThat(voidresult, nullValue());
 		assertThat(WithStaticFinalField.COMPILETIME, equalTo("ABC"));// paradox in source code, effect of inlining (see byte code of this line)
 		Object result = new StaticGetter("COMPILETIME", getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[0]);
@@ -89,14 +99,10 @@ public class StaticSetterTest {
 
 	@Test
 	public void testInvokeWithArgumentConversion() throws Throwable {
-		StaticSetter staticMethod = new StaticSetter("converted", setterFor(WithConvertedProperty.class,"converted"), ConvertedInterface.class);
+		StaticSetter staticMethod = new StaticSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class);
 		staticMethod.invoke(null, new ConvertedInterface() {
 		});
-		assertThat(WithConvertedProperty.converted, notNullValue());
-	}
-
-	interface Properties {
-		void setConverted(@Convert("WithConvertedProperty") ConvertedInterface i);
+		assertThat(WithConvertedField.field, notNullValue());
 	}
 
 	private static class WithField {
@@ -110,9 +116,9 @@ public class StaticSetterTest {
 		static final String COMPILETIME = "ABC";
 	}
 
-	private static class WithConvertedProperty {
+	private static class WithConvertedField {
 
-		private static WithConvertedProperty converted = null;
+		private static WithConvertedField field = null;
 
 	}
 

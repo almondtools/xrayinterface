@@ -51,11 +51,7 @@ public class StaticMethodInvoker implements MethodInvocationHandler {
 
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
-		try {
-			return r(method.invokeWithArguments(a(args)));
-		} catch (InvocationTargetException e) {
-			throw e.getTargetException();
-		}
+		return r(method.invokeWithArguments(a(args)));
 	}
 
 	private Object[] a(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

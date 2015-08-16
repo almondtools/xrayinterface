@@ -5,12 +5,12 @@ public class ConvertedType implements Type {
 	private Class<?> type;
 	private Class<?> converted;
 
-	public ConvertedType(Class<?> type, Class<?> converted) {
+	private ConvertedType(Class<?> type, Class<?> converted) {
 		this.type = type;
 		this.converted = converted;
 	}
 
-	public static Type converted(Class<?> clazz, Class<?> converted) {
+	public static ConvertedType converted(Class<?> clazz, Class<?> converted) {
 		return new ConvertedType(clazz, converted);
 	}
 
@@ -37,5 +37,29 @@ public class ConvertedType implements Type {
 			throw new IllegalArgumentException();
 		}
 	}
+
+	@Override
+	public int hashCode() {
+		return type.getName().hashCode() * 17
+			+ converted.getName().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ConvertedType that = (ConvertedType) obj;
+		return this.type == that.type
+			&& this.converted == that.converted;
+	}
+	
+	
 
 }

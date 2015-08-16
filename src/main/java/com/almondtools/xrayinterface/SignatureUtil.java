@@ -6,7 +6,6 @@ import static java.lang.Character.toUpperCase;
 import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
@@ -167,46 +166,6 @@ public final class SignatureUtil {
 			return "<unknown>";
 		}
 		return clazz.getSimpleName();
-	}
-
-	public static boolean matchesSignature(Method method, Method candidate, String[] convertArguments, String convertResult) {
-		if (!candidate.getName().equals(method.getName())) {
-			return false;
-		}
-		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
-			&& isCompliant(method.getReturnType(), candidate.getReturnType(), convertResult)
-			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
-	}
-
-	public static boolean matchesSignature(Method method, Constructor<?> candidate, String[] convertArguments, String convertResult) {
-		if (!method.getName().equals(CONSTRUCTOR)) {
-			return false;
-		}
-		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
-			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
-	}
-
-	public static boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
-		if (candidateTypes.length != requiredTypes.length) {
-			return false;
-		}
-		if (annotatedNames == null) {
-			annotatedNames = new String[requiredTypes.length];
-		}
-		for (int i = 0; i < candidateTypes.length; i++) {
-			Class<?> candidateType = candidateTypes[i];
-			Class<?> requiredType = requiredTypes[i];
-			if (!isCompliant(requiredType, candidateType, annotatedNames[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
-		return candidateType.equals(requiredType)
-			|| (requiredType.getSimpleName().equals(annotatedName) && requiredType.isAssignableFrom(candidateType))
-			|| candidateType.getSimpleName().equals(annotatedName);
 	}
 
 	public static String findTargetTypeName(Annotation[] annotations, Class<?> defaultType) {

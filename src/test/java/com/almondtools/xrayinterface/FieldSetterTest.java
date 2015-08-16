@@ -34,13 +34,23 @@ public class FieldSetterTest {
 	}
 
 	@Test
-		public void testGetFieldName() throws Exception {
-			assertThat(new FieldSetter("field", null).getFieldName(), equalTo("field"));
-		}
+	public void testGetFieldName() throws Exception {
+		assertThat(new FieldSetter("field", null).getFieldName(), equalTo("field"));
+	}
 
 	@Test
 	public void testGetResultType() throws Exception {
 		assertThat(new FieldSetter("field", setterFor(WithField.class, "field")).getType(), equalTo(String.class));
+	}
+
+	@Test
+	public void testGetTarget() throws Exception {
+		assertThat(new FieldSetter("field", setterFor(WithField.class, "field")).getTarget(), nullValue());
+	}
+
+	@Test
+	public void testGetTargetConverted() throws Exception {
+		assertThat(new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).getTarget(), equalTo(ConvertedInterface.class));
 	}
 
 	@Test
@@ -94,55 +104,63 @@ public class FieldSetterTest {
 	}
 
 	@Test
-	public void testConvertingSetField() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		Object result = new FieldSetter("field", setterFor(ConvertingWithField.class, "field"), ConvertingInterface.class).invoke(object, new Object[] { proxy("hello") });
+	public void testConvertedSetField() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		Object result = new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[] { proxy("hello") });
 		assertThat(result, nullValue());
 		assertThat(object.field.content, equalTo("hello"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testConvertingSetFieldFailingSignatureNone() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter("field", setterFor(ConvertingWithField.class, "field"), ConvertingInterface.class).invoke(object, new Object[0]);
+	@Test
+	public void testConvertedSetFieldNull() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		Object result = new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[] { null });
+		assertThat(result, nullValue());
+		assertThat(object.field, nullValue());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConvertingSetFieldFailingSignatureNull() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter("field", setterFor(ConvertingWithField.class, "field"), ConvertingInterface.class).invoke(object, (Object[]) null);
+	public void testConvertedSetFieldFailingSignatureNone() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[0]);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConvertingSetFieldFailingSignature2() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter("field", setterFor(ConvertingWithField.class, "field"), ConvertingInterface.class).invoke(object, new Object[] { proxy("hello"), "world" });
+	public void testConvertedSetFieldFailingSignatureNull() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, (Object[]) null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConvertedSetFieldFailingSignature2() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[] { proxy("hello"), "world" });
 	}
 
 	@Test(expected = ClassCastException.class)
-	public void testConvertingSetFieldWithoutMatchingType() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter("other", setterFor(ConvertingWithField.class, "other"), String.class).invoke(object, new Object[] { Integer.valueOf(1) });
+	public void testConvertedSetFieldWithoutMatchingType() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		new FieldSetter("other", setterFor(WithConvertedField.class, "other"), String.class).invoke(object, new Object[] { Integer.valueOf(1) });
 	}
 
 	@Test
-	public void testConvertingSetFieldNonConvertible() throws Throwable {
-		ConvertingWithField object = new ConvertingWithField();
-		Object result = new FieldSetter("other", setterFor(ConvertingWithField.class, "other"), String.class).invoke(object, new Object[] { "hello" });
+	public void testConvertedSetFieldNonConvertible() throws Throwable {
+		WithConvertedField object = new WithConvertedField();
+		Object result = new FieldSetter("other", setterFor(WithConvertedField.class, "other"), String.class).invoke(object, new Object[] { "hello" });
 		assertThat(result, nullValue());
 		assertThat(object.other, equalTo("hello"));
 	}
 
 	@Test
-	public void testConvertingSetFieldFinal() throws Throwable {
-		ConvertingWithFinalField object = new ConvertingWithFinalField();
-		Object result = new FieldSetter("finalfield", setterFor(ConvertingWithFinalField.class, "finalfield"), ConvertingInterface.class).invoke(object, new Object[] { proxy("hello") });
+	public void testConvertedSetFieldFinal() throws Throwable {
+		WithConvertedFinalField object = new WithConvertedFinalField();
+		Object result = new FieldSetter("finalfield", setterFor(WithConvertedFinalField.class, "finalfield"), ConvertedInterface.class).invoke(object, new Object[] { proxy("hello") });
 		assertThat(result, nullValue());
 		assertThat(object.finalfield.content, equalTo("hello"));
 	}
 
-	private static ConvertingInterface proxy(final String s) {
-		return new ConvertingInterface() {
+	private static ConvertedInterface proxy(final String s) {
+		return new ConvertedInterface() {
 
 			@Override
 			public String getContent() {
@@ -156,28 +174,28 @@ public class FieldSetterTest {
 		};
 	}
 
-	interface ConvertingInterface {
+	interface ConvertedInterface {
 		String getContent();
 
 		void setContent(String s);
 	}
 
-	private static class ConvertingWithField {
+	private static class WithConvertedField {
 
 		public String other = "hello";
-		public ConvertibleField field = new ConvertibleField();
+		public ConvertedField field = new ConvertedField();
 	}
 
-	private static class ConvertingWithFinalField {
+	private static class WithConvertedFinalField {
 
-		public final ConvertibleField finalfield = new ConvertibleField();
+		public final ConvertedField finalfield = new ConvertedField();
 	}
 
-	private static class ConvertibleField {
+	private static class ConvertedField {
 
 		public String content = "world";
 
-		public ConvertibleField() {
+		public ConvertedField() {
 		}
 
 	}

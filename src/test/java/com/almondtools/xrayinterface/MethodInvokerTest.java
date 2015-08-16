@@ -41,6 +41,11 @@ public class MethodInvokerTest {
 		assertThat(new MethodInvoker("staticMethod", null).getName(), equalTo("staticMethod"));
 	}
 
+	@Test
+	public void testGetResultType() throws Exception {
+		assertThat(new MethodInvoker("staticMethod", methodOf(WithMethod.class, "staticMethod", int.class)).getResultType(), equalTo(String.class));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetTargetParameterTypes() throws Exception {

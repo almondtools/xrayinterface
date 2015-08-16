@@ -1,5 +1,7 @@
 package com.almondtools.xrayinterface;
 
+import static com.almondtools.xrayinterface.FixedType.fixed;
+
 public class MatchType implements Type {
 
 	private String match;
@@ -29,9 +31,11 @@ public class MatchType implements Type {
 	@Override
 	public Type matching(Class<?> type) {
 		if (type.equals(converted)) {
-			return new FixedType(type);
+			return fixed(type);
+		} else if (matches(type)){
+			return ConvertedType.converted(type, converted);
 		} else {
-			return new ConvertedType(type, converted);
+			throw new IllegalArgumentException();
 		}
 	}
 

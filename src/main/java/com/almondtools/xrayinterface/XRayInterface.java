@@ -121,7 +121,18 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 	}
 
 	public List<StaticProperty> getStaticProperties() {
-		return null;
+		Map<String, StaticProperty> properties = new LinkedHashMap<>();
+		for (StaticSetter setter : getStaticSetters()) {
+			String field = setter.getFieldName();
+			StaticProperty property = properties.computeIfAbsent(field, key -> new StaticProperty());
+			property.setSetter(setter);
+		}
+		for (StaticGetter getter : getStaticGetters()) {
+			String field = getter.getFieldName();
+			StaticProperty property = properties.computeIfAbsent(field, key -> new StaticProperty());
+			property.setGetter(getter);
+		}
+		return new ArrayList<>(properties.values());
 	}
 
 	public List<StaticSetter> getStaticSetters() {
@@ -145,14 +156,6 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 			.filter(value -> clazz.isInstance(value))
 			.map(value -> clazz.cast(value))
 			.collect(toList());
-	}
-
-	public String methodName(MethodInvocationHandler m) {
-		return methods.entrySet().stream()
-			.filter(entry -> entry.getValue() == m)
-			.findFirst()
-			.map(method -> method.getKey().getName())
-			.orElse(null);
 	}
 
 	public Object getObject() {

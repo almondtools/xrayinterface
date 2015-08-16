@@ -17,7 +17,7 @@ public class BindingSignature {
 	public Type result;
 	public Type[] params;
 	public Type[] exceptions;
-	
+
 	public BindingSignature() {
 		this("", AUTO);
 	}
@@ -25,7 +25,7 @@ public class BindingSignature {
 	public BindingSignature(String name) {
 		this(name, AUTO);
 	}
-	
+
 	public BindingSignature(String name, BindingQualifier qualifier) {
 		this.qualifier = qualifier;
 		this.name = name;
@@ -33,14 +33,14 @@ public class BindingSignature {
 		this.params = new Type[0];
 		this.exceptions = new Type[0];
 	}
-	
+
 	public boolean hasName() {
 		return name != null && !"".equals(name);
 	}
 
 	public List<BindingQualifier> types() {
 		if (qualifier == AUTO) {
-			return asList(CONSTRUCTOR, METHOD, GET,SET);
+			return asList(METHOD, GET, SET, CONSTRUCTOR);
 		} else {
 			return asList(qualifier);
 		}

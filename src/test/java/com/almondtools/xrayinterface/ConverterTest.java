@@ -42,7 +42,7 @@ public class ConverterTest {
 	}
 
 	@Test
-	public void testConvertResultConvertingValues() throws Exception {
+	public void testConvertResultConvertedValues() throws Exception {
 		Method method = staticSimpleObjectMethod();
 		Method target = interfaceSimpleObjectMethod();
 		assertThat(convertResult(target.getReturnType(), method.getReturnType(), SimpleObject.build("value")), instanceOf(SimpleObjectInterface.class));
@@ -50,7 +50,7 @@ public class ConverterTest {
 	}
 
 	@Test
-	public void testConvertArgumentsConvertingXRayedValues() throws Exception {
+	public void testConvertArgumentsConvertedXRayedValues() throws Exception {
 		Method method = staticSimpleObjectMethod();
 		Method target = interfaceSimpleObjectMethod();
 		SimpleObject val = SimpleObject.build("value");

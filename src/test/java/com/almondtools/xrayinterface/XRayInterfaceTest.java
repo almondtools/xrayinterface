@@ -1,9 +1,13 @@
 package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.XRayMatcher.providesFeaturesOf;
+import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -93,12 +97,32 @@ public class XRayInterfaceTest {
 	}
 
 	@Test
+	public void testNotExistingBindingGetter() throws Exception {
+		try {
+			UnlockedNotMatchingBindingGetterObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingBindingGetterObject.class);
+			unlocked.get();
+		} catch (InterfaceMismatchException e) {
+			assertThat(e.toString(), containsString("notExisting"));
+		}
+	}
+
+	@Test
 	public void testNotExistingSetter() throws Exception {
 		try {
 			UnlockedNotMatchingSetterObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingSetterObject.class);
 			unlocked.setNotExisting(true);
 		} catch (InterfaceMismatchException e) {
 			assertThat(e.toString(), containsString("setNotExisting"));
+		}
+	}
+
+	@Test
+	public void testNotExistingBindingSetter() throws Exception {
+		try {
+			UnlockedNotMatchingBindingSetterObject unlocked = XRayInterface.xray(object).to(UnlockedNotMatchingBindingSetterObject.class);
+			unlocked.set(true);
+		} catch (InterfaceMismatchException e) {
+			assertThat(e.toString(), containsString("notExisting"));
 		}
 	}
 
@@ -152,6 +176,98 @@ public class XRayInterfaceTest {
 		assertThat(unlocked.getInteger(), equalTo(2));
 	}
 
+	@Test
+	public void testGetInterfaceMethodsUnbound() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		assertThat(xray.getInterfaceMethods().keySet(), empty());
+	}
+
+	@Test
+	public void testGetInterfaceMethodsBound() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getInterfaceMethods().keySet(), hasSize(UnlockedObject.class.getMethods().length));
+	}
+	
+	@Test
+	public void testGetConstructors() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getConstructors(), hasSize(0));
+	}
+
+	@Test
+	public void testGetFieldSetters() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getFieldSetters(), hasSize(3));
+		assertThat(xray.getFieldSetters().stream()
+			.map(field -> field.getFieldName())
+			.collect(toSet()), containsInAnyOrder("myField", "superField", "integer"));
+	}
+
+	@Test
+	public void testGetFieldGetters() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getFieldGetters(), hasSize(3));
+		assertThat(xray.getFieldGetters().stream()
+			.map(field -> field.getFieldName())
+			.collect(toSet()), containsInAnyOrder("myField", "superField", "integer"));
+	}
+
+	@Test
+	public void testGetMethods() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getMethods(), hasSize(2));
+		assertThat(xray.getMethods().stream()
+			.map(method -> method.getName())
+			.collect(toSet()), containsInAnyOrder("myMethod", "superMethod"));
+	}
+
+	@Test
+	public void testGetFieldProperties() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getFieldProperties(), hasSize(3));
+		assertThat(xray.getFieldProperties().stream()
+			.map(field -> field.get().getFieldName())
+			.collect(toSet()), containsInAnyOrder("myField", "superField", "integer"));
+		assertThat(xray.getFieldProperties().stream()
+			.map(field -> field.set().getFieldName())
+			.collect(toSet()), containsInAnyOrder("myField", "superField", "integer"));
+	}
+
+	@Test
+	public void testGetFieldPropertiesAsymetric() throws Exception {
+		XRayInterface xray = XRayInterface.xray(object);
+		
+		xray.to(UnlockedObjectAsymetricProperties.class);
+
+		assertThat(xray.getFieldProperties(), hasSize(2));
+		assertThat(xray.getFieldProperties().stream()
+			.filter(field -> field.get() != null)
+			.map(field -> field.get().getFieldName())
+			.collect(toSet()), containsInAnyOrder("superField"));
+		assertThat(xray.getFieldProperties().stream()
+			.filter(field -> field.set() != null)
+			.map(field -> field.set().getFieldName())
+			.collect(toSet()), containsInAnyOrder("myField"));
+	}
+
 	interface UnlockedObject {
 		void setMyField(String value);
 
@@ -171,6 +287,13 @@ public class XRayInterfaceTest {
 
 	}
 
+	interface UnlockedObjectAsymetricProperties {
+		void setMyField(String value);
+
+		double getSuperField();
+
+	}
+
 	interface UnlockedNotMatchingMethodObject {
 
 		boolean notExistingMethod();
@@ -186,6 +309,18 @@ public class XRayInterfaceTest {
 		boolean getNotExisting();
 	}
 
+	interface UnlockedNotMatchingBindingSetterObject {
+		
+		@SetProperty("notExisting")
+		void set(boolean b);
+	}
+	
+	interface UnlockedNotMatchingBindingGetterObject {
+		
+		@GetProperty("notExisting")
+		boolean get();
+	}
+	
 	interface UnlockedWithCorrectExceptions {
 
 		String myMethod(String string) throws IOException;

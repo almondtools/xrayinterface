@@ -6,6 +6,7 @@ import static com.almondtools.xrayinterface.BindingQualifier.GET;
 import static com.almondtools.xrayinterface.BindingQualifier.METHOD;
 import static com.almondtools.xrayinterface.BindingQualifier.SET;
 import static com.almondtools.xrayinterface.FinalUtil.ensureNonFinal;
+import static com.almondtools.xrayinterface.FixedType.fixed;
 import static com.almondtools.xrayinterface.SignatureUtil.computeFieldNames;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.isBooleanGetter;
@@ -78,7 +79,7 @@ public class InvocationResolver {
 		}
 	}
 
-	protected BindingSignature resolveSignature(Method method) {
+	protected BindingSignature resolveSignature(Method method) throws NoSuchMethodException, NoSuchFieldException {
 		BindingSignature signature = initSignature(method.getAnnotations());
 		signature = completeSignature(signature, method);
 		return signature;
@@ -96,15 +97,24 @@ public class InvocationResolver {
 		}
 	}
 
-	private BindingSignature completeSignature(BindingSignature signature, Method method) {
+	private BindingSignature completeSignature(BindingSignature signature, Method method) throws NoSuchMethodException, NoSuchFieldException {
+		Exception exception = null;
 		for (BindingQualifier type : signature.types()) {
 			try {
 				return completeSignature(type, signature, method);
 			} catch (NoSuchFieldException | NoSuchMethodException e) {
-				continue;
+				if (exception == null) {
+					exception = e;
+				}
 			}
 		}
-		return new BindingSignature(method.getName());
+		if (exception instanceof NoSuchFieldException){
+			throw (NoSuchFieldException) exception;
+		} else if (exception instanceof NoSuchMethodException){
+			throw (NoSuchMethodException) exception;
+		} else {
+			return new BindingSignature(method.getName());
+		}
 	}
 
 	private BindingSignature completeSignature(BindingQualifier type, BindingSignature signature, Method method) throws NoSuchMethodException, NoSuchFieldException {
@@ -150,7 +160,7 @@ public class InvocationResolver {
 			if (converted != null) {
 				return new MatchType(name(converted, valueClass), valueClass);
 			} else {
-				return new FixedType(valueClass);
+				return fixed(valueClass);
 			}
 		} else {
 			return null;
@@ -182,7 +192,7 @@ public class InvocationResolver {
 		if (converted != null) {
 			return new MatchType(name(converted, valueClass), valueClass);
 		} else {
-			return new FixedType(valueClass);
+			return fixed(valueClass);
 		}
 	}
 
@@ -214,7 +224,7 @@ public class InvocationResolver {
 		if (converted != null) {
 			return new MatchType(name(converted, valueClass), valueClass);
 		} else {
-			return new FixedType(valueClass);
+			return fixed(valueClass);
 		}
 	}
 
@@ -228,7 +238,7 @@ public class InvocationResolver {
 			if (converted != null) {
 				types[i] = new MatchType(name(converted, valueClass), valueClass);
 			} else {
-				types[i] = new FixedType(valueClass);
+				types[i] = fixed(valueClass);
 			}
 		}
 		return types;
@@ -239,7 +249,7 @@ public class InvocationResolver {
 		Type[] types = new Type[exceptions.length];
 		for (int i = 0; i < exceptions.length; i++) {
 			Class<?> valueClass = exceptions[i];
-			types[i] = new FixedType(valueClass);
+			types[i] = fixed(valueClass);
 		}
 		return types;
 	}
@@ -295,7 +305,7 @@ public class InvocationResolver {
 		try {
 			MethodHandle getter = lookup.unreflectGetter(field);
 			if (isStatic(field.getModifiers())) {
-				return new StaticGetter(field.getName(), getter, convertedPropertyType).asMethodInvocationHandler();
+				return new StaticGetter(field.getName(), getter, convertedPropertyType);
 			} else {
 				return new FieldGetter(field.getName(), getter, convertedPropertyType);
 			}

@@ -35,6 +35,10 @@ public class ConstructorInvoker implements MethodInvocationHandler {
 		this.targetParameterTypes = targetParameterTypes;
 	}
 
+	public Class<?> getResultType() {
+		return constructor.type().returnType();
+	}
+
 	public Class<?>[] getTargetParameterTypes() {
 		return targetParameterTypes;
 	}
@@ -45,11 +49,7 @@ public class ConstructorInvoker implements MethodInvocationHandler {
 
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
-		try {
-			return r(constructor.invokeWithArguments(a(args)));
-		} catch (InvocationTargetException e) {
-			throw e.getTargetException();
-		}
+		return r(constructor.invokeWithArguments(a(args)));
 	}
 
 	private Object[] a(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

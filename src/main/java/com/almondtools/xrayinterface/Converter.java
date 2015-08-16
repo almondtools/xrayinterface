@@ -1,12 +1,10 @@
 package com.almondtools.xrayinterface;
 
-import static com.almondtools.xrayinterface.SignatureUtil.findTargetTypeName;
 import static com.almondtools.xrayinterface.SignatureUtil.isBooleanGetter;
 import static com.almondtools.xrayinterface.SignatureUtil.isGetter;
 import static com.almondtools.xrayinterface.SignatureUtil.isSetter;
 import static com.almondtools.xrayinterface.SignatureUtil.propertyOf;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -58,14 +56,6 @@ public class Converter {
 		return propertyPairs;
 	}
 
-	public static String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
-		String[] convert = new String[parameterAnnotations.length];
-		for (int i = 0; i < parameterAnnotations.length; i++) {
-			convert[i] = findTargetTypeName(parameterAnnotations[i], parameterTypes[i]);
-		}
-		return convert;
-	}
-
 	public static Object[] convertArguments(Class<?>[] targetTypes, Class<?>[] methodTypes, Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException,
 		IllegalArgumentException, InvocationTargetException, SecurityException {
 		if (args == null) {
@@ -83,6 +73,8 @@ public class Converter {
 	public static Object convertArgument(Class<?> targetType, Class<?> methodType, Object arg) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		if (targetType.equals(methodType)) {
 			return arg;
+		} else if (arg == null) {
+			return null;
 		} else {
 			return convert(arg, methodType, targetType);
 		}
@@ -96,22 +88,6 @@ public class Converter {
 		} else {
 			return XRayInterface.xray(result).to(targetType);
 		}
-	}
-
-	public static boolean isConverted(Method method) {
-		if (method.getAnnotation(Convert.class) != null) {
-			return true;
-		}
-		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		for (int i = 0; i < parameterTypes.length; i++) {
-			Class<?> parameterType = parameterTypes[i];
-			Annotation[] annotations = parameterAnnotations[i];
-			if (findTargetTypeName(annotations, parameterType) != null) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public static Object convert(Object object, Class<?> clazz, Class<?> accessibleClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,

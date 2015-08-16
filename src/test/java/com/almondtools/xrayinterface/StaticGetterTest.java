@@ -2,6 +2,7 @@ package com.almondtools.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.invoke.MethodHandle;
@@ -28,13 +29,23 @@ public class StaticGetterTest {
 	}
 
 	@Test
-		public void testGetFieldName() throws Exception {
-			assertThat(new StaticGetter("field", null).getFieldName(), equalTo("field"));
-		}
+	public void testGetFieldName() throws Exception {
+		assertThat(new StaticGetter("field", null).getFieldName(), equalTo("field"));
+	}
 
 	@Test
 	public void testGetResultType() throws Exception {
 		assertThat(new StaticGetter("field", getterFor(WithField.class, "field")).getResultType(), equalTo(String.class));
+	}
+
+	@Test
+	public void testGetTarget() throws Exception {
+		assertThat(new StaticGetter("field", getterFor(WithField.class, "field")).getTarget(), nullValue());
+	}
+
+	@Test
+	public void testGetTargetConverted() throws Exception {
+		assertThat(new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).getTarget(), equalTo(ConvertedInterface.class));
 	}
 
 	@Test
@@ -56,28 +67,23 @@ public class StaticGetterTest {
 
 	@Test
 	public void testInvokeWithResultConversion() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ConvertedInterface.class);
+		StaticGetter staticMethod = new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class);
 		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 
 	@Test(expected = InterfaceMismatchException.class)
-	public void testConvertingGetFieldContravariant() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ContravariantInterface.class);
+	public void testConvertedGetFieldContravariant() throws Throwable {
+		StaticGetter staticMethod = new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class);
 		staticMethod.invoke(null);
 	}
 
 	@Test
-	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter("converted", getterFor(WithConvertedProperty.class, "converted"), ConvertedContravariantInterface.class);
+	public void testConvertedGetFieldConvertedContravariant() throws Throwable {
+		StaticGetter staticMethod = new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedContravariantInterface.class);
 		Object result = staticMethod.invoke(null);
 		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
 		assertThat(((ConvertedContravariantInterface) result).getOther().toString(), equalTo("other"));
-	}
-
-	interface Properties {
-		@Convert("WithConvertedProperty")
-		ConvertedInterface getConverted();
 	}
 
 	@SuppressWarnings("unused")
@@ -87,9 +93,9 @@ public class StaticGetterTest {
 	}
 
 	@SuppressWarnings("unused")
-	private static class WithConvertedProperty {
+	private static class WithConvertedField {
 
-		private static WithConvertedProperty converted = new WithConvertedProperty();
+		private static WithConvertedField field = new WithConvertedField();
 		private static String other = "other";
 
 	}

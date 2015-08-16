@@ -65,8 +65,4 @@ public class StaticGetter implements MethodInvocationHandler {
 		return convertResult(target, getter.type().returnType(), result);
 	}
 
-	public MethodInvocationHandler asMethodInvocationHandler() {
-		return (object, args) -> invoke(args);
-	}
-
 }

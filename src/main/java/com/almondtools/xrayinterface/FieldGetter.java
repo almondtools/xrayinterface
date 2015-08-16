@@ -4,7 +4,6 @@ import static com.almondtools.xrayinterface.Converter.convertResult;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
-import java.util.function.Function;
 
 /**
  * Wraps a field with read (getter) access.
@@ -58,18 +57,6 @@ public class FieldGetter implements MethodInvocationHandler {
 			throw new IllegalArgumentException("getters can only be invoked with no argument, was " + args.length + " arguments");
 		}
 		return r(getter.invoke(object));
-	}
-
-	public Object getSafely(Object object) {
-		return getSafely(object, ExceptionHandlers.RETURN_NULL);
-	}
-	
-	public Object getSafely(Object object, Function<Throwable, Object> handler) {
-		try {
-			return invoke(object);
-		} catch (Throwable e) {
-			return handler.apply(e);
-		}
 	}
 
 	private Object r(Object result) throws NoSuchMethodException {

@@ -1,12 +1,17 @@
 package com.almondtools.xrayinterface;
 
 import static com.almondtools.xrayinterface.ClassUnlockableMatcher.canBeTreatedAs;
+import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+
 
 public class XRayInterfaceStaticTest {
 
@@ -78,6 +83,109 @@ public class XRayInterfaceStaticTest {
 		assertThat(unlocked.getDEFAULT(), equalTo("default"));
 	}
 
+	@Test
+	public void testGetInterfaceMethods() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getInterfaceMethods().keySet(), hasSize(UnlockedObject.class.getMethods().length));
+	}
+
+	@Test
+	public void testGetConstructors() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getConstructors(), hasSize(1));
+	}
+
+	@Test
+	public void testGetStaticSetters() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getStaticSetters(), hasSize(1));
+		assertThat(xray.getStaticSetters().stream()
+			.map(field -> field.getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+	}
+
+	@Test
+	public void testGetStaticGetters() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getStaticGetters(), hasSize(1));
+		assertThat(xray.getStaticGetters().stream()
+			.map(field -> field.getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+	}
+
+	@Test
+	public void testGetMethods() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getStaticMethods(), hasSize(1));
+		assertThat(xray.getStaticMethods().stream()
+			.map(method -> method.getName())
+			.collect(toSet()), containsInAnyOrder("reset"));
+	}
+
+	@Test
+	public void testGetStaticProperties() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObject.class);
+
+		assertThat(xray.getStaticProperties(), hasSize(1));
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.get() != null)
+			.map(field -> field.get().getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.get() != null)
+			.map(field -> field.set().getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+	}
+
+	@Test
+	public void testGetStaticPropertiesSetterOnly() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObjectSetterOnly.class);
+
+		assertThat(xray.getStaticProperties(), hasSize(1));
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.get() != null)
+			.collect(toSet()), empty());
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.set() != null)
+			.map(field -> field.set().getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+	}
+
+	@Test
+	public void testGetStaticPropertiesGetterOnly() throws Exception {
+		XRayInterface xray = XRayInterface.xray(LockedObjectWithPrivateConstructor.class);
+		
+		xray.to(UnlockedObjectGetterOnly.class);
+		
+		assertThat(xray.getStaticProperties(), hasSize(1));
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.set() != null)
+			.collect(toSet()), empty());
+		assertThat(xray.getStaticProperties().stream()
+			.filter(field -> field.get() != null)
+			.map(field -> field.get().getFieldName())
+			.collect(toSet()), containsInAnyOrder("DEFAULT"));
+	}
+	
 	public static interface UnlockedObject {
 
 		public LockedObjectWithPrivateConstructor newLockedObjectWithPrivateConstructor();
@@ -87,6 +195,18 @@ public class XRayInterfaceStaticTest {
 		public void setDEFAULT(String value);
 
 		public String getDEFAULT();
+
+	}
+
+	public static interface UnlockedObjectGetterOnly {
+		
+		public String getDEFAULT();
+		
+	}
+	
+	public static interface UnlockedObjectSetterOnly {
+
+		public void setDEFAULT(String value);
 
 	}
 

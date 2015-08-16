@@ -35,27 +35,27 @@ public class MethodInvoker implements MethodInvocationHandler {
 		this.targetReturnType = targetReturnType;
 		this.targetParameterTypes = targetParameterTypes;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
+	public Class<?> getResultType() {
+		return method.type().returnType();
+	}
+
 	public Class<?>[] getTargetParameterTypes() {
 		return targetParameterTypes;
 	}
-	
+
 	public Class<?> getTargetReturnType() {
 		return targetReturnType;
 	}
 
 	@Override
 	public Object invoke(Object object, Object... args) throws Throwable {
-		try {
-			MethodHandle unimorphMethod = method.bindTo(object);
-			return r(unimorphMethod.invokeWithArguments(a(args)));
-		} catch (InvocationTargetException e) {
-			throw e.getTargetException();
-		}
+		MethodHandle unimorphMethod = method.bindTo(object);
+		return r(unimorphMethod.invokeWithArguments(a(args)));
 	}
 
 	private Object[] a(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

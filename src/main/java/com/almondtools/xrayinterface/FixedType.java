@@ -1,17 +1,23 @@
 package com.almondtools.xrayinterface;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 public class FixedType implements Type {
 
 	public static final FixedType VOID = new FixedType(void.class);
 	
+	private static final Map<Class<?>, FixedType> TYPES = new IdentityHashMap<>();
+	
 	private Class<?> type;
 
-	public FixedType(Class<?> type) {
+	private FixedType(Class<?> type) {
 		this.type = type;
 	}
 
-	public static Type fixed(Class<?> clazz) {
-		return new FixedType(clazz);
+	public static FixedType fixed(Class<?> clazz) {
+		FixedType computeIfAbsent = TYPES.computeIfAbsent(clazz, key -> new FixedType(key));
+		return computeIfAbsent;
 	}
 
 	@Override
