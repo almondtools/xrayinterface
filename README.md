@@ -48,7 +48,7 @@ and take an x-ray snapshot:
 
 You want to learn about the advantages of XRayInterface over pure Java reflection? Then see [here](XRayInterfaceVsJavaReflection.md).
 
-Maybe you are interested in some advances examples
+Maybe you are interested in some advanced examples
 
 * on [opening a sealed class](OpeningASealedClass.md)
 * on [handling Singletons](HandlingSingletons.md)

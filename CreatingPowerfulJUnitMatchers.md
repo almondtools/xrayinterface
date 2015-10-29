@@ -1,6 +1,6 @@
 Creating Powerful JUnit/Hamcrest Matchers
 =========================================
-If you are strongly familiar with unit testing you probably faced the problem that you got a result object with a complex hidden inner state (i.e. many variables without accessors). Sometimes one can test the inner state by calling other methods (relying on the inner state), but often this makes testing even more complicated. So how can XRayInterface help you testing such objects.
+If you are strongly familiar with unit testing you probably faced the problem that you got a result object with a complex hidden inner state (i.e. many variables without accessors). Sometimes one can test the inner state by calling other methods (relying on the inner state), but often this makes testing even more complicated. So how can XRayInterface help you testing such objects?
 
 Look at this test for the class `House` from this [example](OpeningASealedClass.md):
 
