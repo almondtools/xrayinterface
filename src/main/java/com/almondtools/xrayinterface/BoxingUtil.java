@@ -1,6 +1,7 @@
 package com.almondtools.xrayinterface;
 
 public final class BoxingUtil {
+
 	private BoxingUtil() {
 	}
 

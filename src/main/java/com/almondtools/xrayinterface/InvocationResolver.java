@@ -108,9 +108,9 @@ public class InvocationResolver {
 				}
 			}
 		}
-		if (exception instanceof NoSuchFieldException){
+		if (exception instanceof NoSuchFieldException) {
 			throw (NoSuchFieldException) exception;
-		} else if (exception instanceof NoSuchMethodException){
+		} else if (exception instanceof NoSuchMethodException) {
 			throw (NoSuchMethodException) exception;
 		} else {
 			return new BindingSignature(method.getName());
@@ -292,7 +292,7 @@ public class InvocationResolver {
 				return new FieldSetter(field.getName(), getter, convertedPropertyType);
 			}
 		} catch (IllegalAccessException e) {
-			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
+			throw new ReflectionFailedException(e);
 		}
 	}
 
@@ -310,7 +310,7 @@ public class InvocationResolver {
 				return new FieldGetter(field.getName(), getter, convertedPropertyType);
 			}
 		} catch (IllegalAccessException e) {
-			throw new NoSuchFieldException(field.getName() + " is not accessible. Check your security manager.");
+			throw new ReflectionFailedException(e);
 		}
 	}
 
@@ -349,7 +349,7 @@ public class InvocationResolver {
 				return new MethodInvoker(method.getName(), methodHandle, result.convertedType(), convertedTypes(params));
 			}
 		} catch (IllegalAccessException e) {
-			throw new NoSuchMethodException(method.getName() + " is not accessible. Check your security manager.");
+			throw new ReflectionFailedException(e);
 		}
 	}
 
@@ -394,7 +394,7 @@ public class InvocationResolver {
 		try {
 			return new ConstructorInvoker(lookup.unreflectConstructor(constructor), result.convertedType(), convertedTypes(params));
 		} catch (IllegalAccessException e) {
-			throw new NoSuchMethodException(constructor.getName() + " is not accessible. Check your security manager.");
+			throw new ReflectionFailedException(e);
 		}
 	}
 

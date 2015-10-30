@@ -13,8 +13,6 @@ import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.xrayinterface.StaticSetterTest.ConvertedInterface;
-
 @SuppressWarnings("unused")
 public class FieldGetterTest {
 

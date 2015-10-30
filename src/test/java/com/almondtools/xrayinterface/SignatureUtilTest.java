@@ -1,5 +1,6 @@
 package com.almondtools.xrayinterface;
 
+import static com.almondtools.conmatch.conventions.UtilityClassMatcher.isUtilityClass;
 import static com.almondtools.xrayinterface.SignatureUtil.computeFieldNames;
 import static com.almondtools.xrayinterface.SignatureUtil.fieldSignature;
 import static com.almondtools.xrayinterface.SignatureUtil.findTargetTypeName;
@@ -30,6 +31,11 @@ import java.util.Collections;
 import org.junit.Test;
 
 public class SignatureUtilTest {
+
+	@Test
+	public void testSignatureUtil() throws Exception {
+		assertThat(SignatureUtil.class, isUtilityClass());
+	}
 
 	@Test
 	public void testMethodSignatureOnlyName() throws Exception {
