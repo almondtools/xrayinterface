@@ -16,8 +16,7 @@ public final class FinalUtil {
 
 	public static void makeNonFinal(Field field) {
 		try {
-			Field modifiersField;
-			modifiersField = Field.class.getDeclaredField(MODIFIERS);
+			Field modifiersField = Field.class.getDeclaredField(MODIFIERS);
 			modifiersField.setAccessible(true);
 			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 		} catch (ReflectiveOperationException e) {

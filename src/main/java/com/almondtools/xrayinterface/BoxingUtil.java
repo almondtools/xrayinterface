@@ -24,10 +24,8 @@ public final class BoxingUtil {
 			return Double.class;
 		} else if (Boolean.TYPE.equals(type)) {
 			return Boolean.class;
-		} else if (Void.TYPE.equals(type)) {
-			return Void.class;
 		} else {
-			return Object.class;
+			return Void.class;
 		}
 	}
 
