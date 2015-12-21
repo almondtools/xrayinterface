@@ -3,7 +3,6 @@ package com.almondtools.xrayinterface;
 import static com.almondtools.xrayinterface.Converter.convertArgument;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -30,7 +29,7 @@ public class StaticSetter implements MethodInvocationHandler {
 	}
 
 	/**
-	 * Sets a value on the given field. Beyond {@link #StaticSetter(Class, Field)} this constructor also converts the argument
+	 * Sets a value on the given field. Beyond {@link #StaticSetter(String,MethodHandle)} this constructor also converts the argument
 	 * 
 	 * @param fieldName the name of the field to set
 	 * @param setter the setter method handle for the field to access

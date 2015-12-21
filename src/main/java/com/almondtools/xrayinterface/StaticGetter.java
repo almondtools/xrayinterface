@@ -3,7 +3,6 @@ package com.almondtools.xrayinterface;
 import static com.almondtools.xrayinterface.Converter.convertResult;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Field;
 
 /**
  * Wraps a static field with read (getter) access.
@@ -26,7 +25,7 @@ public class StaticGetter implements MethodInvocationHandler {
 	}
 
 	/**
-	 * Gets a value on the given field. Beyond {@link #StaticGetter(Class, Field)} this constructor also converts the result
+	 * Gets a value on the given field. Beyond {@link #StaticGetter(String,MethodHandle)} this constructor also converts the result
 	 * 
 	 * @param fieldName the name of the field to set
 	 * @param getter method handle for the field to access

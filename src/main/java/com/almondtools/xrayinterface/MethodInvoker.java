@@ -5,7 +5,6 @@ import static com.almondtools.xrayinterface.Converter.convertResult;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Invokes a given method.
@@ -17,13 +16,18 @@ public class MethodInvoker implements MethodInvocationHandler {
 	private Class<?>[] targetParameterTypes;
 	private Class<?> targetReturnType;
 
+	/**
+	 * Invokes the given method
+	 * @param name the name of the method
+	 * @param method the method to invoke
+	 */
 	public MethodInvoker(String name, MethodHandle method) {
 		this.name = name;
 		this.method = method;
 	}
 
 	/**
-	 * Invokes a given method. Beyond {@link #MethodInvoker(Method)} this constructor also converts the method signature
+	 * Invokes a given method. Beyond {@link #MethodInvoker(String,MethodHandle)} this constructor also converts the method signature
 	 * @param name the name of the method
 	 * @param method the method to invoke
 	 * @param targetReturnType the return type the result of the actual invocation should be converted to

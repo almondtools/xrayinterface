@@ -24,13 +24,14 @@ import java.util.Set;
  * After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the xrayinterface conventions:
  * 
  * <table>
- * <col width="30%"/> <col width="30%"/> <col width="40%"/> <thead>
- * <tr>
- * <th>Method</th>
- * <th>Maps to</th>
- * <th></th>
- * </tr>
+ * <caption>mapping conventions</caption>
  * <thead>
+ * <tr>
+ * <th style="width:30%">Method</th>
+ * <th style="width:30%">Maps to</th>
+ * <th style="width:40%"></th>
+ * </tr>
+ * </thead>
  * <tr>
  * <td><code>void setProperty([sometype] t)</code></td>
  * <td><code>void setProperty([sometype] t)</code></td>
@@ -39,7 +40,7 @@ import java.util.Set;
  * <tr>
  * <td></td>
  * <td><code>property = t;</code></td>
- * <td>if there is a property <code>[sometype] property;</td>
+ * <td>if there is a property <code>[sometype]</code> property;</td>
  * </tr>
  * <tr>
  * <td><code>[sometype] getProperty()</code></td>
@@ -49,7 +50,7 @@ import java.util.Set;
  * <tr>
  * <td></td>
  * <td><code>return property;</code></td>
- * <td>if there is a property <code>[sometype] property;</td>
+ * <td>if there is a property <code>[sometype]</code> property;</td>
  * </tr>
  * <tr>
  * <td><code>[booleantype] isProperty()</code></td>
@@ -59,7 +60,7 @@ import java.util.Set;
  * <tr>
  * <td></td>
  * <td><code>return property;</code></td>
- * <td>if there is a property <code>[booleantype] property;</td>
+ * <td>if there is a property <code>[booleantype]</code> property;</td>
  * </tr>
  * <tr>
  * <td><code>[return type] methodname([signature])</code></td>
@@ -165,7 +166,7 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 	/**
 	 * wraps the given object. The result of this method will be decoratable with the new interface
 	 * 
-	 * @param type the class to unlock/decorate
+	 * @param object the object to unlock/decorate
 	 * @return the wrapped object
 	 */
 	public static XRayInterface xray(Object object) {
@@ -180,8 +181,8 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 	 * maps the given interface to the wrapped object
 	 * 
 	 * @param interfaceClass the given interface class (defining the type of the result)
+	 * @param <T> the type to wrap the object in
 	 * @return an object of the type of interfaceClass (mapped to the members of the wrapped object)
-	 * @throws NoSuchMethodException if a method of the interface class could not be mapped according to the upper rules
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T to(Class<T> interfaceClass) {

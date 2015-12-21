@@ -5,7 +5,6 @@ import static com.almondtools.xrayinterface.Converter.convertResult;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Invokes a given static method.
@@ -23,9 +22,8 @@ public class StaticMethodInvoker implements MethodInvocationHandler {
 	}
 
 	/**
-	 * Invokes a given method. Beyond {@link #StaticMethodInvoker(Class, Method)} this constructor also converts the method signature
+	 * Invokes a given method. Beyond {@link #StaticMethodInvoker(String,MethodHandle)} this constructor also converts the method signature
 	 * @param name the name of the method
-	 * @param type the static type to invoke the method on
 	 * @param method the method to invoke
 	 * @param targetReturnType the return type the result of the actual invocation should be converted to
 	 * @param targetParameterTypes the types the parameters should be converted from
