@@ -1,7 +1,7 @@
 XRayInterface
 =============
 
-XRayInterface is a convenient interface to Java reflection.
+XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is a convenient interface to Java reflection.
 
 * not depending on strings
 * but on interface conventions
@@ -55,6 +55,16 @@ Maybe you are interested in some advanced examples
 * on [creating powerful JUnit Matchers](CreatingPowerfulJUnitMatchers.md)
 * on [the binding conventions of XrayInterface](BindingConventions.md) 
 * on [maintaining and tracking XrayInterfaces](MaintainingAndTrackingXRayInterfaces.md) 
+
+
+XRayInterface vs. Picklock
+==========================
+XRayInterface follows the same idea as Picklock, yet there are some difference:
+
+* XRayInterface requires Java 8 (or higher)
+* XRayInterface may be bound by convention (method names) or annotations
+* XRayInterface is probably more performant because it relies on method handles (and not on the reflection api as Picklock)
+* the API is different
 
 
 Using XRayInterface
