@@ -6,56 +6,9 @@ XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is 
 * not depending on strings
 * but on interface conventions
 
-XRayInterface is easy to use:
+This Readme contains technical infos to the project (e.g. Problems, Roadmap or the State of Work)
 
-* determine which private fields or methods you are missing 
-* define the public interface you are missing
-* bind this interface with XRayInterface to the object you want to access
-
-
-e.g. setting a private field `x` of your instance `foo`. Then define an interface:
-
-    interface OpenFoo {
-      void setX(String value);
-    }
-    
-and take an x-ray snapshot:
-
-     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
-     openFoo.setX("bar");
-
-or getting the value of some private field `y` of your instance `foo`. Then define an interface:
-
-    interface OpenFoo {
-      String getX();
-    }
-    
-and take an x-ray snapshot:
-
-     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
-     String bar = openFoo.getX();
-
-or making a simple private method `boolean m(int value)` of `foo` accessible. Then define an interface:
-
-    interface OpenFoo {
-      boolean m(int value);
-    }
-    
-and take an x-ray snapshot:
-
-     OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);
-     int bar = openFoo.m("bar");
-
-You want to learn about the advantages of XRayInterface over pure Java reflection? Then see [here](XRayInterfaceVsJavaReflection.md).
-
-Maybe you are interested in some advanced examples
-
-* on [opening a sealed class](OpeningASealedClass.md)
-* on [handling Singletons](HandlingSingletons.md)
-* on [creating powerful JUnit Matchers](CreatingPowerfulJUnitMatchers.md)
-* on [the binding conventions of XrayInterface](BindingConventions.md) 
-* on [maintaining and tracking XrayInterfaces](MaintainingAndTrackingXRayInterfaces.md) 
-
+Information on Usage and Download can be found on [XRayInterface](http://almondtools.github.io/xrayinterface/). 
 
 XRayInterface vs. Picklock
 ==========================
@@ -65,18 +18,3 @@ XRayInterface follows the same idea as Picklock, yet there are some difference:
 * XRayInterface may be bound by convention (method names) or annotations
 * XRayInterface is probably more performant because it relies on method handles (and not on the reflection api as Picklock)
 * the API is different
-
-
-Using XRayInterface
-===================
-
-Maven Dependency
-----------------
-
-```xml
-<dependency>
-	<groupId>com.github.almondtools</groupId>
-	<artifactId>xrayinterface</artifactId>
-	<version>0.2.8</version>
-</dependency>
-```
