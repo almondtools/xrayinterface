@@ -41,21 +41,24 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 
 	@Override
 	public boolean matches(Object item) {
-		Class<?> itemClass = item.getClass();
 		for (Map.Entry<String, Object> property : properties.entrySet()) {
 			String name = property.getKey();
 			Object value = property.getValue();
-			Matcher<?> matcher = matcherFor(value);
-			Object itemValue = propertyValueFor(itemClass, item, name);
-			if (!matcher.matches(itemValue)) {
+			try {
+				Object itemValue = propertyValueFor(item, name);
+				Matcher<?> matcher = matcherFor(value);
+				if (!matcher.matches(itemValue)) {
+					return false;
+				}
+			} catch (NoSuchFieldException e) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private Object propertyValueFor(Class<?> itemClass, Object item, String name) {
-		Class<?> currentClass = itemClass;
+	private Object propertyValueFor(Object item, String name) throws NoSuchFieldException {
+		Class<?> currentClass = item.getClass();
 		while (currentClass != null) {
 			for (String fieldName : SignatureUtil.computeFieldNames(name)) {
 				try {
@@ -68,7 +71,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
-		return null;
+		throw new NoSuchFieldException(name);
 	}
 
 	private Matcher<?> matcherFor(Object value) {
@@ -84,6 +87,19 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 	@Override
 	public void describeTo(Description description) {
 		description.appendText("with properties ").appendValueList("", ", ", "", properties.entrySet());
+	}
+
+	@Override
+	public void describeMismatch(Object item, Description description) {
+		Map<String, Object> mismatchedProperties = new LinkedHashMap<>();
+		for (String property : properties.keySet()) {
+			try {
+				mismatchedProperties.put(property, propertyValueFor(item, property));
+			} catch (NoSuchFieldException e) {
+				mismatchedProperties.put(property, "<missing>");
+			}
+		}
+		description.appendText("with properties ").appendValueList("", ", ", "", mismatchedProperties.entrySet());
 	}
 
 	private static final class XRayInterfaceWith<S, T extends Matcher<S>> extends XRayInterface {
