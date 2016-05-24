@@ -233,7 +233,11 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		MethodInvocationHandler handler = methods.get(method);
-		return handler.invoke(object, args);
+		if (handler != null) {
+			return handler.invoke(object, args);
+		} else {
+			return method.invoke(object, args);
+		}
 	}
 
 }

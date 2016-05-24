@@ -4,6 +4,7 @@ import static com.almondtools.xrayinterface.XRayMatcher.providesFeaturesOf;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -42,6 +43,12 @@ public class XRayInterfaceTest {
 		assertThat(unlocked.myMethod("123", true), equalTo(123));
 		assertThat(unlocked.myMethod("123", false), equalTo(0));
 		assertThat(unlocked.myMethod("ABC", false), equalTo(0));
+	}
+
+	@Test
+	public void testMethodInvocationFallback() throws Exception {
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
+		assertThat(unlocked.equals(object), is(true));
 	}
 
 	@Test
