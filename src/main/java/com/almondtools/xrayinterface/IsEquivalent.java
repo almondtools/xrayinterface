@@ -8,6 +8,7 @@ import java.util.Map;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 
@@ -92,14 +93,26 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 	@Override
 	public void describeMismatch(Object item, Description description) {
 		Map<String, Object> mismatchedProperties = new LinkedHashMap<>();
-		for (String property : properties.keySet()) {
+		for (Map.Entry<String,Object> entry : properties.entrySet()) {
+			String property = entry.getKey();
+			Object expected = entry.getValue();
 			try {
-				mismatchedProperties.put(property, propertyValueFor(item, property));
+				Object value = propertyValueFor(item, property);
+				if (expected instanceof Matcher<?>) {
+					value = describe((Matcher<?>) expected, value);
+				}
+				mismatchedProperties.put(property, value);
 			} catch (NoSuchFieldException e) {
 				mismatchedProperties.put(property, "<missing>");
 			}
 		}
 		description.appendText("with properties ").appendValueList("", ", ", "", mismatchedProperties.entrySet());
+	}
+
+	private String describe(Matcher<?> expected, Object value) {
+		StringDescription description = new StringDescription();
+		expected.describeMismatch(value, description);
+		return description.toString();
 	}
 
 	private static final class XRayInterfaceWith<S, T extends Matcher<S>> extends XRayInterface {
