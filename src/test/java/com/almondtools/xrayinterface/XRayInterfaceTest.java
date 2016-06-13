@@ -46,9 +46,15 @@ public class XRayInterfaceTest {
 	}
 
 	@Test
-	public void testMethodInvocationFallback() throws Exception {
+	public void testMethodEquals() throws Exception {
 		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
-		assertThat(unlocked.equals(object), is(true));
+		assertThat(unlocked.equals(unlocked), is(true));
+	}
+
+	@Test
+	public void testMethodHashcode() throws Exception {
+		UnlockedObject unlocked = XRayInterface.xray(object).to(UnlockedObject.class);
+		assertThat(unlocked.hashCode(), equalTo(object.hashCode()));
 	}
 
 	@Test

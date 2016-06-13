@@ -236,7 +236,21 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 		if (handler != null) {
 			return handler.invoke(object, args);
 		} else {
-			return method.invoke(object, args);
+			return method.invoke(this, args);
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return object.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Proxy) {
+			return obj.equals(this);
+		} else {
+			return super.equals(obj);
 		}
 	}
 

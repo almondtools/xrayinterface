@@ -114,6 +114,11 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		expected.describeMismatch(value, description);
 		return description.toString();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
 
 	private static final class XRayInterfaceWith<S, T extends Matcher<S>> extends XRayInterface {
 		private XRayInterfaceWith(Object object) {
