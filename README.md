@@ -1,4 +1,4 @@
-[XRayInterface](http://almondtools.github.io/xrayinterface/)
+[XRayInterface](http://xrayinterface.amygdalum.net/)
 =============
 
 XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is a convenient interface to Java reflection.
@@ -8,7 +8,7 @@ XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is 
 
 This Readme contains technical infos to the project (e.g. Problems, Roadmap or the State of Work)
 
-Information on Usage and Download can be found on [XRayInterface](http://almondtools.github.io/xrayinterface/). 
+Information on Usage and Download can be found on [XRayInterface](http://xrayinterface.amygdalum.net/). 
 
 XRayInterface vs. Picklock
 ==========================
