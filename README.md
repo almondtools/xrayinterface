@@ -1,5 +1,6 @@
 [XRayInterface](http://xrayinterface.amygdalum.net/)
 =============
+[![Build Status](https://api.travis-ci.org/almondtools/xrayinterface.svg)](https://travis-ci.org/almondtools/xrayinterface)
 
 XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is a convenient interface to Java reflection.
 
