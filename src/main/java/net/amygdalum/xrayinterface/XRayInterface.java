@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -194,6 +195,9 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 				Class<?> currentClass = todo.remove(0);
 				done.add(currentClass);
 				for (Method method : currentClass.getDeclaredMethods()) {
+					if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
+						continue;
+					}
 					if (!methods.containsKey(method)) {
 						methods.put(method, findInvocationHandler(method));
 					}

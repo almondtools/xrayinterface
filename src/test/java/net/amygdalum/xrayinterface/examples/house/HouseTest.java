@@ -77,7 +77,7 @@ public class HouseTest {
 
 	@Test
 	public void testMatchingHouses() throws Exception {
-		assertThat(house, IsEquivalent.equivalentTo(XRayHouseMatcher.class)
+		assertThat(house, XRayHouseMatcher.matchesHouse()
 			.withHouseKey(key)
 			.withLocked(true)
 			.withFurniture(hasSize(1)));
@@ -107,5 +107,10 @@ public class HouseTest {
 		XRayHouseMatcher withHouseKey(Key key);
 		XRayHouseMatcher withLocked(boolean locked);
 		XRayHouseMatcher withFurniture(Matcher<Collection<? extends Object>> furniture);
+		
+		static XRayHouseMatcher matchesHouse() {
+			return IsEquivalent.equivalentTo(XRayHouseMatcher.class);
+		}
+		
 	}
 }
