@@ -20,3 +20,14 @@ XRayInterface follows the same idea as Picklock, yet there are some difference:
 * XRayInterface may be bound by convention (method names) or annotations
 * XRayInterface is probably more performant because it relies on method handles (and not on the reflection api as Picklock)
 * the API is different
+
+Maven Dependency
+================
+
+```xml
+<dependency>
+    <groupId>net.amygdalum</groupId>
+    <artifactId>xrayinterface</artifactId>
+    <version>0.3.1</version>
+</dependency>
+```
