@@ -98,7 +98,7 @@ public class Converter {
 				return ((XRayInterface) invocationHandler).getObject();
 			}
 		}
-		Object converted = createBaseObject(clazz, accessibleClass);
+		Object converted = createBaseObject(clazz);
 		Object accessible = XRayInterface.xray(converted).to(accessibleClass);
 		for (Method[] getSetPair : findProperties(accessibleClass)) {
 			Method get = getSetPair[0];
@@ -111,7 +111,7 @@ public class Converter {
 		return converted;
 	}
 
-	private static Object createBaseObject(Class<?> clazz, Class<?> accessibleClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	private static Object createBaseObject(Class<?> clazz) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		Constructor<?> constructor = clazz.getDeclaredConstructor();
 		constructor.setAccessible(true);
 		return constructor.newInstance();

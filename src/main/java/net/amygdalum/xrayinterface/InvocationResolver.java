@@ -414,7 +414,7 @@ public class InvocationResolver {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchMethodException(SignatureUtil.methodSignature("<init>", type, paramTypes, exceptionTypes));
+		throw new NoSuchMethodException(methodSignature("<init>", type, paramTypes, exceptionTypes));
 	}
 
 }
