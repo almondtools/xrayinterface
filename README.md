@@ -1,5 +1,6 @@
 [XRayInterface](http://xrayinterface.amygdalum.net/)
 =============
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dd9620f14c664b6ab3c1b2870f17d96d)](https://app.codacy.com/app/almondtools/xrayinterface?utm_source=github.com&utm_medium=referral&utm_content=almondtools/xrayinterface&utm_campaign=badger)
 [![Build Status](https://api.travis-ci.org/almondtools/xrayinterface.svg)](https://travis-ci.org/almondtools/xrayinterface)
 [![codecov](https://codecov.io/gh/almondtools/xrayinterface/branch/master/graph/badge.svg)](https://codecov.io/gh/almondtools/xrayinterface)
 
