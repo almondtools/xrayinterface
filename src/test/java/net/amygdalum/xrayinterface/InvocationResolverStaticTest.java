@@ -65,7 +65,7 @@ public class InvocationResolverStaticTest {
 	@Test
 	public void testCreateSetterInvocatorConverted() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		assertThat(resolver.createSetterInvocator("convertible", ConvertedType.converted(ConvertibleObject.class, ConvertibleInterface.class)), notNullValue());
+		assertThat(resolver.createSetterInvocator("convertible", converted(ConvertibleObject.class, ConvertibleInterface.class)), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
@@ -216,7 +216,7 @@ public class InvocationResolverStaticTest {
 				if (type instanceof Type) {
 					return (Type) type;
 				} else if (type instanceof Class<?>) {
-					return FixedType.fixed((Class<?>) type);
+					return fixed((Class<?>) type);
 				} else {
 					return (Type) null;
 				}
