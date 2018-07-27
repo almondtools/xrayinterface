@@ -2,6 +2,7 @@
 =============
 [![Build Status](https://api.travis-ci.org/almondtools/xrayinterface.svg)](https://travis-ci.org/almondtools/xrayinterface)
 [![codecov](https://codecov.io/gh/almondtools/xrayinterface/branch/master/graph/badge.svg)](https://codecov.io/gh/almondtools/xrayinterface)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c5cf275a6ff9468f95b22b8998b52e1d)](https://www.codacy.com/project/almondtools/xrayinterface/dashboard?utm_source=github.com&utm_medium=referral&utm_content=almondtools/xrayinterface&utm_campaign=Badge_Grade_Dashboard)
 
 XRayInterface (formerly [Picklock](https://github.com/almondtools/picklock)) is a convenient interface to Java reflection.
 

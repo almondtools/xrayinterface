@@ -11,10 +11,6 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import net.amygdalum.xrayinterface.FixedType;
-import net.amygdalum.xrayinterface.InvocationResolver;
-import net.amygdalum.xrayinterface.Type;
-
 @SuppressWarnings("unused")
 public class InvocationResolverInstanceTest {
 
@@ -169,7 +165,7 @@ public class InvocationResolverInstanceTest {
 				if (type instanceof Type) {
 					return (Type) type;
 				} else if (type instanceof Class<?>) {
-					return FixedType.fixed((Class<?>) type);
+					return fixed((Class<?>) type);
 				} else {
 					return (Type) null;
 				}

@@ -43,7 +43,6 @@ public class IsEquivalentTest {
 		assertThat(new EqTest("str", 42), equivalentTo(EqTestMatcher.class)
 			.withI(CoreMatchers.<Integer> both(greaterThan(41)).and(lessThan(43)))
 			.withStr(containsString("st")));
-		;
 	}
 
 	@Test

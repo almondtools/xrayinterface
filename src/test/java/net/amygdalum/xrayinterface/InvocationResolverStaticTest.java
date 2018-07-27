@@ -14,11 +14,6 @@ import org.junit.Test;
 
 import net.amygdalum.xrayinterface.InvocationResolverInstanceTest.ConvertibleInterface;
 
-import net.amygdalum.xrayinterface.ConvertedType;
-import net.amygdalum.xrayinterface.FixedType;
-import net.amygdalum.xrayinterface.InvocationResolver;
-import net.amygdalum.xrayinterface.Type;
-
 @SuppressWarnings("unused")
 public class InvocationResolverStaticTest {
 
@@ -65,7 +60,7 @@ public class InvocationResolverStaticTest {
 	@Test
 	public void testCreateSetterInvocatorConverted() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		assertThat(resolver.createSetterInvocator("convertible", ConvertedType.converted(ConvertibleObject.class, ConvertibleInterface.class)), notNullValue());
+		assertThat(resolver.createSetterInvocator("convertible", converted(ConvertibleObject.class, ConvertibleInterface.class)), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
@@ -216,7 +211,7 @@ public class InvocationResolverStaticTest {
 				if (type instanceof Type) {
 					return (Type) type;
 				} else if (type instanceof Class<?>) {
-					return FixedType.fixed((Class<?>) type);
+					return fixed((Class<?>) type);
 				} else {
 					return (Type) null;
 				}

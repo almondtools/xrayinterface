@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
 import org.junit.Before;
@@ -17,7 +18,6 @@ import net.amygdalum.xrayinterface.FieldSetter;
 
 public class FieldPropertyTest {
 
-	private MethodHandles.Lookup lookup;
 	private MethodHandle get;
 	private MethodHandle set;
 	
@@ -25,7 +25,7 @@ public class FieldPropertyTest {
 
 	@Before
 	public void before() throws Exception {
-		this.lookup = MethodHandles.lookup();
+		Lookup lookup = MethodHandles.lookup();
 		Field field = FieldPropertyTest.class.getDeclaredField("field");
 		this.get = lookup.unreflectGetter(field);
 		this.set = lookup.unreflectSetter(field);
