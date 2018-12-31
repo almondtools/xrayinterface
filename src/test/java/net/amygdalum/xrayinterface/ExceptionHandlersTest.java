@@ -1,6 +1,6 @@
 package net.amygdalum.xrayinterface;
 
-import static com.almondtools.conmatch.conventions.UtilityClassMatcher.isUtilityClass;
+import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 

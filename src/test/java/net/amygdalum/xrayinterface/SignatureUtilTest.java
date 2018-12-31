@@ -1,6 +1,6 @@
 package net.amygdalum.xrayinterface;
 
-import static com.almondtools.conmatch.conventions.UtilityClassMatcher.isUtilityClass;
+import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
 import static java.util.Arrays.asList;
 import static net.amygdalum.xrayinterface.SignatureUtil.computeFieldNames;
 import static net.amygdalum.xrayinterface.SignatureUtil.fieldSignature;

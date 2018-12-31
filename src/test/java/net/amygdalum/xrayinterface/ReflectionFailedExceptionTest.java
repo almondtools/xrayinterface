@@ -1,6 +1,6 @@
 package net.amygdalum.xrayinterface;
 
-import static com.almondtools.conmatch.conventions.OrdinaryExceptionMatcher.matchesOrdinaryException;
+import static net.amygdalum.extensions.hamcrest.conventions.OrdinaryExceptionMatcher.matchesOrdinaryException;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;

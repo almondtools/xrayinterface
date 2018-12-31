@@ -1,6 +1,6 @@
 package net.amygdalum.xrayinterface;
 
-import static com.almondtools.conmatch.conventions.UtilityClassMatcher.isUtilityClass;
+import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
 import static net.amygdalum.xrayinterface.FinalUtil.ensureNonFinal;
 import static net.amygdalum.xrayinterface.FinalUtil.isFinal;
 import static org.hamcrest.CoreMatchers.is;
