@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>net.amygdalum</groupId>
 			<artifactId>hamcrest-extensions</artifactId>
-			<version>0.1.18</version>
+			<version>0.1.19</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
