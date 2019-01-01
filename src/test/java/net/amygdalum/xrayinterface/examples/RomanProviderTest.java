@@ -7,8 +7,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import net.amygdalum.xrayinterface.XRayInterface;
-
 public class RomanProviderTest {
 
 	@Test
@@ -59,7 +57,7 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateConstructor() throws Exception {
-		NumberProvider numberProvider = XRayInterface.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.newRandomNumberProvider(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
@@ -80,10 +78,10 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticField() throws Exception {
-		NumberProvider numberProvider = XRayInterface.xray(RandomNumberProvider.class)
+		NumberProvider numberProvider = xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.newRandomNumberProvider(21);
-		XRayInterface.xray(RandomNumberProvider.class)
+		xray(RandomNumberProvider.class)
 				.to(UnlockedStaticNumberProvider.class)
 				.setINSTANCE(numberProvider);
 		RomanProvider decorator = new RomanProvider(RandomNumberProvider.getInstance());
@@ -93,8 +91,7 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticFinalField() throws Exception {
-		UnlockedReallyMeanNumberProvider bluePrint = XRayInterface
-				.xray(ReallyMeanNumberProvider.class)
+		UnlockedReallyMeanNumberProvider bluePrint = xray(ReallyMeanNumberProvider.class)
 				.to(UnlockedReallyMeanNumberProvider.class);
 
 		ReallyMeanNumberProvider numberProvider = bluePrint.newReallyMeanNumberProvider();
