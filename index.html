@@ -2,6 +2,7 @@
       <html lang="en">
                 <head>
                   <meta charset="utf-8"/>
+              <meta name="viewport" content="width=device-width, user-scalable=yes"/>
               <meta name="google-site-verification" content="zi2eDd9lPMxUKII5BagZe7uZLJdM-xwB3MYmn7At8m4"/>
               <meta name="google-site-verification" content="1tr9mxi3jNPA21quNokfjk011xmqU4KEYwxceZ4nPQg"/>
               <meta name="msvalidate.01" content="126AC9C6E2D2542FF635FD81D91FBF19"/>
@@ -16,181 +17,77 @@
             <body>
                     <header>
                               <nav class="navbar navbar-dark bg-dark navbar-expand-sm" role="navigation">
-      <div class="container-fluid">
-                  <div class="navbar-header">
-              <button type="button" class="navbar-toggler" data-toggle="collapse" data-target=".navbar-collapse">
-                  <span class="navbar-toggler-icon"></span>
-  </button>
-          <a href="download.html" class="navbar-brand">
-    XRayInterface
-  </a>
-  </div>
-              <div class="collapse navbar-collapse">
-      <ul class="navbar-nav">
-              <li class="nav-item active">  <a class="nav-link" href="index.html">
-    Home
-  </a></li>
-          <li class="nav-item">  <a class="nav-link" href="download.html">
-    Get it!
-  </a></li>
-          <li class="nav-item">  <a class="nav-link" href="license.html">
-    License
-  </a></li>
-  </ul>
-  </div>
-  </div>
+    <div class="container-fluid">            <div class="navbar-header">        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target=".navbar-collapse">            <span class="navbar-toggler-icon"></span></button>
+        <a href="download.html" class="navbar-brand">XRayInterface</a></div>
+            <div class="collapse navbar-collapse"><ul class="navbar-nav">        <li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Get it!</a></li>
+        <li class="nav-item"><a class="nav-link" href="license.html">License</a></li></ul></div></div>
   </nav>
-                        <div class="jumbotron">
-      <div class="container">
-              <h1>XRayInterface</h1>
-          <p>XrayInterface allows you to adapt foreign classes to your interfaces by automatically mapping property methods to private fields of the adapted instances. XrayInterface also creating Hamcrest-Matchers by deriving them from such interfaces.</p>
-          <p>  <a href="download.html" class="btn btn-primary">
-    Get XRayInterface
-  </a>   <a href="https://github.com/almondtools/xrayinterface" class="btn btn-light">
-    Github
-  </a></p>
-  </div>
-  </div>
+                      <div class="jumbotron"><div class="container">        <h1>XRayInterface</h1>
+        <p>XrayInterface allows you to adapt foreign classes to your interfaces by automatically mapping property methods to private fields of the adapted instances. XrayInterface also creating Hamcrest-Matchers by deriving them from such interfaces.</p>
+        <p><a href="download.html" class="btn btn-primary">Get XRayInterface</a> <a href="https://github.com/almondtools/xrayinterface" class="btn btn-light">Github</a></p></div></div>
   </header>
               <main>
-      <div class="container">
-                  <section class="page-section">
-              <p>            XRayInterface is a convenient interface to Java reflection
-              <ul>
-                      <li>not depending on strings</li>
-                  <li>but on interface conventions</li>
-  </ul></p>
+    <div class="container">              <section class="page-section">
+            <p>            XRayInterface is a convenient interface to Java reflection
+            <ul>                <li>not depending on strings</li>
+                <li>but on interface conventions</li></ul></p>
   </section>
               <section class="page-section">
-              <h2>Example</h2>
-              <div class="row">
-              <div class="order-2 col-lg-4">
-                      <div class="card info-card">
-              <div class="card-header">
-      <h4 class="panel-title">XRayInterface is easy to use:</h4>
-  </div>
-          <div class="card-body">
-                      <ul>
-                          <li>determine which private fields or methods needed</li>
-                      <li>define the public interface you are missing:</li>
-                      <ul>
-                              <li>      <code >setX()</code> for a property       <code >x</code> to change</li>
-                          <li>      <code >getX()</code> for a property       <code >x</code> to read</li>
-                          <li>      <code >methodX()</code> for a method       <code >methodX</code> to invoke</li>
-  </ul>
-                      <li>bind this interface with XRayInterface to the object you want to access</li>
-  </ul>
-  </div>
-  </div>
-  </div>
-          <div class="order-1 col-lg-8">
-                  <h4>Setting a private field       <code >x</code> of your instance       <code >foo</code></h4>
-              <p>                  <ul>
-                          <li>Define the interface</li>
-                          <div>
-      <pre><code >interface OpenFoo {
+            <h2>Example</h2>
+            <div class="row">        <div class="order-2 col-lg-4">                <div class="card info-card">        <div class="card-header"><h4 class="panel-title">XRayInterface is easy to use:</h4></div>
+        <div class="card-body">                <ul>                    <li>determine which private fields or methods needed</li>
+                    <li>define the public interface you are missing:</li>
+                    <ul>                        <li>    <code >setX()</code> for a property     <code >x</code> to change</li>
+                        <li>    <code >getX()</code> for a property     <code >x</code> to read</li>
+                        <li>    <code >methodX()</code> for a method     <code >methodX</code> to invoke</li></ul>
+                    <li>bind this interface with XRayInterface to the object you want to access</li></ul></div></div></div>
+        <div class="order-1 col-lg-8">            <h4>Setting a private field     <code >x</code> of your instance     <code >foo</code></h4>
+            <p>                <ul>                    <li>Define the interface</li>
+                        <div><pre><code >interface OpenFoo {
       void setX(String value);
-}</code></pre>
-  </div>
-                      <li>take an x-ray snapshot</li>
-                          <div>
-      <pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre>
-  </div>
-                      <li>and set the property via interface</li>
-                          <div>
-      <pre><code >openFoo.setX(&quot;bar&quot;);</code></pre>
-  </div>
-  </ul></p>
-              <h4>Getting the value of some private field       <code >y</code> of your instance       <code >foo</code></h4>
-              <p>                  <ul>
-                          <li>Define the interface</li>
-                          <div>
-      <pre><code >interface OpenFoo {
+}</code></pre></div>
+                    <li>take an x-ray snapshot</li>
+                        <div><pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre></div>
+                    <li>and set the property via interface</li>
+                        <div><pre><code >openFoo.setX(&quot;bar&quot;);</code></pre></div></ul></p>
+            <h4>Getting the value of some private field     <code >y</code> of your instance     <code >foo</code></h4>
+            <p>                <ul>                    <li>Define the interface</li>
+                        <div><pre><code >interface OpenFoo {
     String getX();
-}</code></pre>
-  </div>
-                      <li>take an x-ray snapshot</li>
-                          <div>
-      <pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre>
-  </div>
-                      <li>and get the property via interface</li>
-                          <div>
-      <pre><code >String bar = openFoo.getX();</code></pre>
-  </div>
-  </ul></p>
-              <h4>Making a private method       <code >boolean m(int value)</code> of       <code >foo</code> accessible</h4>
-              <p>                  <ul>
-                          <li>Define the interface</li>
-                          <div>
-      <pre><code >interface OpenFoo {
+}</code></pre></div>
+                    <li>take an x-ray snapshot</li>
+                        <div><pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre></div>
+                    <li>and get the property via interface</li>
+                        <div><pre><code >String bar = openFoo.getX();</code></pre></div></ul></p>
+            <h4>Making a private method     <code >boolean m(int value)</code> of     <code >foo</code> accessible</h4>
+            <p>                <ul>                    <li>Define the interface</li>
+                        <div><pre><code >interface OpenFoo {
     boolean m(int value);
-}</code></pre>
-  </div>
-                      <li>take an x-ray snapshot</li>
-                          <div>
-      <pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre>
-  </div>
-                      <li>and get the property via interface</li>
-                          <div>
-      <pre><code >int bar = openFoo.m(&quot;bar&quot;);</code></pre>
-  </div>
-  </ul></p>
-  </div>
-  </div>
+}</code></pre></div>
+                    <li>take an x-ray snapshot</li>
+                        <div><pre><code >OpenFoo openFoo = XRayInterface.xray(foo).to(OpenFoo.class);</code></pre></div>
+                    <li>and get the property via interface</li>
+                        <div><pre><code >int bar = openFoo.m(&quot;bar&quot;);</code></pre></div></ul></p></div></div>
   </section>
               <section class="page-section">
-              <h2>More about XRayInterface</h2>
-              <div class="row">
-              <div class="order-2 col-lg-4">
-                      <div class="card info-card">
-              <div class="card-header">
-    XRayInterface vs Java Reflection
-  </div>
-          <div class="card-body">
-                      <p>                    Note that XRayInterface is based on JavaReflection. So there is no reason to blame java reflection. </p>
-                  <p>                    Yet XRayInterface provides a convenient interface for the most common cases. There are several advantages of using 
-                    XRayInterface. You can read more   <a href="https://github.com/almondtools/xrayinterface/blob/master/XRayInterfaceVsJavaReflection.md">
-    here
-  </a>.</p>
-  </div>
-  </div>
-  </div>
-          <div class="order-1 col-lg-8">
-                  <p>                Maybe you are interested in some advanced examples:   <ul>
-                          <li>on   <a href="https://github.com/almondtools/xrayinterface/blob/master/OpeningASealedClass.md">
-    opening a sealed class
-  </a></li>
-                      <li>on   <a href="https://github.com/almondtools/xrayinterface/blob/master/HandlingSingletons.md">
-    handling Singletons
-  </a></li>
-                      <li>on   <a href="https://github.com/almondtools/xrayinterface/blob/master/CreatingPowerfulJUnitMatchers.md">
-    creating powerful JUnit Matchers
-  </a></li>
-                      <li>on   <a href="https://github.com/almondtools/xrayinterface/blob/master/BindingConventions.md">
-    the binding conventions of XrayInterface
-  </a></li>
-                      <li>on   <a href="https://github.com/almondtools/xrayinterface/blob/master/MaintainingAndTrackingXRayInterfaces.md">
-    maintaining and tracking XrayInterfaces
-  </a></li>
-  </ul></p> 
-  </div>
-  </div>
+            <h2>More about XRayInterface</h2>
+            <div class="row">        <div class="order-2 col-lg-4">                <div class="card info-card">        <div class="card-header">XRayInterface vs Java Reflection</div>
+        <div class="card-body">                <p>                    Note that XRayInterface is based on JavaReflection. So there is no reason to blame java reflection. </p>
+                <p>                    Yet XRayInterface provides a convenient interface for the most common cases. There are several advantages of using 
+                    XRayInterface. You can read more <a href="https://github.com/almondtools/xrayinterface/blob/master/XRayInterfaceVsJavaReflection.md">here</a>.</p></div></div></div>
+        <div class="order-1 col-lg-8">            <p>                Maybe you are interested in some advanced examples: <ul>                    <li>on <a href="https://github.com/almondtools/xrayinterface/blob/master/OpeningASealedClass.md">opening a sealed class</a></li>
+                    <li>on <a href="https://github.com/almondtools/xrayinterface/blob/master/HandlingSingletons.md">handling Singletons</a></li>
+                    <li>on <a href="https://github.com/almondtools/xrayinterface/blob/master/CreatingPowerfulJUnitMatchers.md">creating powerful JUnit Matchers</a></li>
+                    <li>on <a href="https://github.com/almondtools/xrayinterface/blob/master/BindingConventions.md">the binding conventions of XrayInterface</a></li>
+                    <li>on <a href="https://github.com/almondtools/xrayinterface/blob/master/MaintainingAndTrackingXRayInterfaces.md">maintaining and tracking XrayInterfaces</a></li></ul></p> </div></div>
 
   </section>
               <section class="page-section">
-              <div class="row">
-                  <div class="order-2 col-lg-4">
-                
-  </div>
-              <div class="order-1 col-lg-8">
-                      <h2>Authors</h2>
-                  <p>  <a href="http://www.amygdalum.net">
-    Stefan Mandel
-  </a></p>
-  </div>
-  </div>
-  </section>
-  </div>
+            <div class="row">            <div class="order-2 col-lg-4">            </div>
+            <div class="order-1 col-lg-8">                <h2>Authors</h2>
+                <p><a href="http://www.amygdalum.net">Stefan Mandel</a></p></div></div>
+  </section></div>
   </main>
               <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
               <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
