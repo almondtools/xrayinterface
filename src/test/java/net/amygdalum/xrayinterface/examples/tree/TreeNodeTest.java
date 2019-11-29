@@ -30,7 +30,7 @@ public class TreeNodeTest {
 	}
 
 	@Test
-	public void TestEquals() throws Exception {
+	public void testEquals() throws Exception {
 		TreeNode root = createTree();
 
 		TreeNode expected = new TreeNode("root", null);
