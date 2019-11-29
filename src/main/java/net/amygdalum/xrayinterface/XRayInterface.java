@@ -2,6 +2,8 @@ package net.amygdalum.xrayinterface;
 
 import static java.util.stream.Collectors.toList;
 
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -82,16 +84,16 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 		this.object = object;
 	}
-	
+
 	public XRayInterface(Class<?> clazz) {
 		super(clazz);
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 	}
-	
+
 	public Map<Method, MethodInvocationHandler> getInterfaceMethods() {
 		return methods;
 	}
-	
+
 	public List<ConstructorInvoker> getConstructors() {
 		return methods.values().stream()
 			.filter(value -> value instanceof ConstructorInvoker)
@@ -208,7 +210,7 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 					}
 				}
 			}
-			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
+			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] {interfaceClass}, this);
 		} catch (NoSuchFieldException e) {
 			throw new InterfaceMismatchException("cannot resolve property " + e.getMessage() + " on " + getType());
 		} catch (NoSuchMethodException e) {
@@ -239,16 +241,26 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 		MethodInvocationHandler handler = methods.get(method);
 		if (handler != null) {
 			return handler.invoke(object, args);
+		} else if (method.isDefault()) {
+			Constructor<Lookup> constructor = Lookup.class
+                .getDeclaredConstructor(Class.class);
+            constructor.setAccessible(true);
+            Lookup lookup = constructor.newInstance(method.getDeclaringClass());
+			return lookup
+                .in(method.getDeclaringClass())
+                .unreflectSpecial(method, method.getDeclaringClass())
+                .bindTo(proxy)
+                .invokeWithArguments(args);
 		} else {
 			return method.invoke(this, args);
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return object.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Proxy) {
