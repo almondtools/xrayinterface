@@ -1,5 +1,6 @@
 package net.amygdalum.xrayinterface.examples.tree;
 
+import static net.amygdalum.xrayinterface.examples.tree.TreeNodeTest.TreeNodeMatcher.treeNodeWithId;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -80,7 +81,7 @@ public class TreeNodeTest {
 		return root;
 	}
 
-	interface TreeNodeMatcher extends Matcher<TreeNode> {
+	interface TreeNodeMatcher extends org.hamcrest.Matcher<TreeNode> {
 		public TreeNodeMatcher withId(String id);
 
 		public TreeNodeMatcher withChildren(Matcher<Iterable<? extends TreeNode>> c);
@@ -88,10 +89,12 @@ public class TreeNodeTest {
 		public default TreeNodeMatcher withChildrenContaining(TreeNodeMatcher... c) {
 			return withChildren(contains(c));
 		}
-
+		
+		public static TreeNodeMatcher treeNodeWithId(String id) {
+			return IsEquivalent.equivalentTo(TreeNodeMatcher.class).withId(id);
+		}
 	}
+	
+	
 
-	public static TreeNodeMatcher treeNodeWithId(String id) {
-		return IsEquivalent.equivalentTo(TreeNodeMatcher.class).withId(id);
-	}
 }
