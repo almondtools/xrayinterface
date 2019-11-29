@@ -29,6 +29,6 @@ Maven Dependency
 <dependency>
     <groupId>net.amygdalum</groupId>
     <artifactId>xrayinterface</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.3</version>
 </dependency>
 ```
