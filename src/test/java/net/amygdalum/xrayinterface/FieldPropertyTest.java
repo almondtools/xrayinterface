@@ -1,8 +1,8 @@
 package net.amygdalum.xrayinterface;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -11,10 +11,6 @@ import java.lang.reflect.Field;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.FieldGetter;
-import net.amygdalum.xrayinterface.FieldProperty;
-import net.amygdalum.xrayinterface.FieldSetter;
 
 public class FieldPropertyTest {
 

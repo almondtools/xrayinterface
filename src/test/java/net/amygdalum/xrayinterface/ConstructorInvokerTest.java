@@ -2,9 +2,9 @@ package net.amygdalum.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -15,9 +15,6 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.ConstructorInvoker;
-import net.amygdalum.xrayinterface.Convert;
 
 @SuppressWarnings("unused")
 public class ConstructorInvokerTest {
@@ -44,7 +41,6 @@ public class ConstructorInvokerTest {
 		assertThat(new ConstructorInvoker(constructorOf(WithConstructor.class)).getResultType(), equalTo(WithConstructor.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetTargetParameterTypes() throws Exception {
 		assertThat(new ConstructorInvoker(constructorOf(WithConstructor.class)).getTargetParameterTypes(), nullValue());

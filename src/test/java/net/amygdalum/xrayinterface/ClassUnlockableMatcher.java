@@ -8,8 +8,6 @@ import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeMatcher;
 
-import net.amygdalum.xrayinterface.XRayInterface;
-
 public class ClassUnlockableMatcher extends TypeSafeMatcher<Class<?>> {
 
 	private Class<?> interfaceClazz;

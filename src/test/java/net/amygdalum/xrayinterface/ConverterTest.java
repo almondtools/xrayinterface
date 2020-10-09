@@ -4,13 +4,11 @@ import static net.amygdalum.xrayinterface.Converter.convertArguments;
 import static net.amygdalum.xrayinterface.Converter.convertResult;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.reflect.Method;
 
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.XRayInterface;
 
 
 public class ConverterTest {

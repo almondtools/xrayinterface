@@ -4,13 +4,11 @@ import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.
 import static net.amygdalum.xrayinterface.FinalUtil.ensureNonFinal;
 import static net.amygdalum.xrayinterface.FinalUtil.isFinal;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.reflect.Field;
 
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.FinalUtil;
 
 
 public class FinalUtilTest {

@@ -2,13 +2,11 @@ package net.amygdalum.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.XRayMatcher;
 
 public class XRayMatcherTest {
 

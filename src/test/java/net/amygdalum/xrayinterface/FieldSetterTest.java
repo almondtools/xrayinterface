@@ -2,7 +2,7 @@ package net.amygdalum.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -11,9 +11,6 @@ import java.lang.reflect.Field;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.FieldGetter;
-import net.amygdalum.xrayinterface.FieldSetter;
 
 public class FieldSetterTest {
 

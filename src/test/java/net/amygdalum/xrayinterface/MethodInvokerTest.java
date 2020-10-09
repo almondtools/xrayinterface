@@ -2,8 +2,8 @@ package net.amygdalum.xrayinterface;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -15,9 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import net.amygdalum.xrayinterface.StaticMethodInvokerTest.ConvertedInterface;
-
-import net.amygdalum.xrayinterface.Convert;
-import net.amygdalum.xrayinterface.MethodInvoker;
 
 @SuppressWarnings("unused")
 public class MethodInvokerTest {
@@ -49,7 +46,6 @@ public class MethodInvokerTest {
 		assertThat(new MethodInvoker("staticMethod", methodOf(WithMethod.class, "staticMethod", int.class)).getResultType(), equalTo(String.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetTargetParameterTypes() throws Exception {
 		assertThat(new MethodInvoker("staticMethod", methodOf(WithMethod.class, "staticMethod", int.class)).getTargetParameterTypes(), nullValue());

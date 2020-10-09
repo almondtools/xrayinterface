@@ -5,7 +5,7 @@ import static net.amygdalum.xrayinterface.FixedType.VOID;
 import static net.amygdalum.xrayinterface.FixedType.fixed;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.stream.Stream;

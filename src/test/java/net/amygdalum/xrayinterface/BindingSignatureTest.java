@@ -7,13 +7,11 @@ import static net.amygdalum.xrayinterface.BindingQualifier.METHOD;
 import static net.amygdalum.xrayinterface.BindingQualifier.SET;
 import static net.amygdalum.xrayinterface.FixedType.VOID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.BindingSignature;
 
 public class BindingSignatureTest {
 

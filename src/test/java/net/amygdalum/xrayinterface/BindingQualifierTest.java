@@ -1,7 +1,7 @@
 package net.amygdalum.xrayinterface;
 
 import static net.amygdalum.extensions.hamcrest.conventions.EnumMatcher.isEnum;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 

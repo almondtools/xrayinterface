@@ -6,22 +6,16 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.Delegate;
-import net.amygdalum.xrayinterface.GetProperty;
-import net.amygdalum.xrayinterface.InterfaceMismatchException;
-import net.amygdalum.xrayinterface.SetProperty;
-import net.amygdalum.xrayinterface.XRayInterface;
 
 public class XRayInterfaceTest {
 

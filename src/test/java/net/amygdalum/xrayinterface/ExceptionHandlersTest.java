@@ -1,14 +1,12 @@
 package net.amygdalum.xrayinterface;
 
 import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.ExceptionHandlers;
 
 public class ExceptionHandlersTest {
 

@@ -1,7 +1,7 @@
 package net.amygdalum.xrayinterface;
 
-import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
 import static java.util.Arrays.asList;
+import static net.amygdalum.extensions.hamcrest.conventions.UtilityClassMatcher.isUtilityClass;
 import static net.amygdalum.xrayinterface.SignatureUtil.computeFieldNames;
 import static net.amygdalum.xrayinterface.SignatureUtil.fieldSignature;
 import static net.amygdalum.xrayinterface.SignatureUtil.findTargetTypeName;
@@ -15,12 +15,12 @@ import static net.amygdalum.xrayinterface.SignatureUtil.propertyOf;
 import static net.amygdalum.xrayinterface.SignatureUtil.propertyTypeOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -29,9 +29,6 @@ import java.text.ParseException;
 import java.util.Collections;
 
 import org.junit.Test;
-
-import net.amygdalum.xrayinterface.Convert;
-import net.amygdalum.xrayinterface.SignatureUtil;
 
 public class SignatureUtilTest {
 
