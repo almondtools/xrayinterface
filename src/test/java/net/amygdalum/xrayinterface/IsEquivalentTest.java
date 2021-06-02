@@ -3,27 +3,35 @@ package net.amygdalum.xrayinterface;
 import static net.amygdalum.xrayinterface.IsEquivalent.equivalentTo;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
+import org.hamcrest.core.IsNot;
 import org.junit.Test;
 
 public class IsEquivalentTest {
 
 	@Test
-	public void testValueBasedDefaultValues() throws Exception {
-		assertThat(new EqTest(), equivalentTo(EqTestValue.class)
+	public void testComparisonWithNull() throws Exception {
+		assertThat((EqTest) null, IsNot.not((Matcher<EqTest>) equivalentTo(EqTestValue.class)
 			.withI(0)
-			.withStr(null));
+			.withStr(null)));
 	}
 
+	@Test
+	public void testValueBasedDefaultValues() throws Exception {
+		assertThat(new EqTest(), equivalentTo(EqTestValue.class)
+				.withI(0)
+				.withStr(null));
+	}
+	
 	@Test
 	public void testValueBasedSetValues() throws Exception {
 		assertThat(new EqTest("str", 42), equivalentTo(EqTestValue.class)

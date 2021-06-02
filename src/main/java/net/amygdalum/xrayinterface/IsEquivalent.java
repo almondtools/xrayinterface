@@ -42,6 +42,9 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 
 	@Override
 	public boolean matches(Object item) {
+		if (item == null) {
+			return false;
+		}
 		for (Map.Entry<String, Object> property : properties.entrySet()) {
 			String name = property.getKey();
 			Object value = property.getValue();
