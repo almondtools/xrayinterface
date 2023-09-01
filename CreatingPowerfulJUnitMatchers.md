@@ -5,7 +5,7 @@ If you are strongly familiar with unit testing you probably faced the problem th
 Look at this test for the class `House` from this [example](OpeningASealedClass.md):
 
 ```Java
-    @Test
+	@Test
 	public void testMatchingHouses() throws Exception {
 		assertThat(house, IsEquivalent.equivalentTo(XRayMatcher.class)
 			.withHouseKey(key)

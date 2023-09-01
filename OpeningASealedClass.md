@@ -39,7 +39,7 @@ Not knowing the house key will not give you access to the house and its furnitur
 The classic way to access the house would be reflection:
 
 ```Java
-    public List<Furniture> open(House house) throws Exception {
+	public List<Furniture> open(House house) throws Exception {
 		Class<? extends House> houseClass = house.getClass(); // class lookup
 		Method open = houseClass.getDeclaredMethod("open", new Class<?>[0]); // method lookup, type signature wrapping
 		open.setAccessible(true); // access enabling
@@ -51,7 +51,7 @@ The classic way to access the house would be reflection:
 The xrayinterface style for example:
 
 ```Java
-    public List<Furniture> open(House house) {
+	public List<Furniture> open(House house) {
 		XRayHouse xRayHouse = XRayInterface.xray(house).to(XRayHouse.class); // unlock interface
 		xRayHouse.open(); // call unlocked method
 		return house.listFurniture();
@@ -72,7 +72,7 @@ Assume that we do not want to call the open method, but we want to know the hous
 For example:
 
 ```Java
-    public List<Furniture> open(House house) throws NoSuchMethodException {
+	public List<Furniture> open(House house) throws NoSuchMethodException {
 		XrayHouse xRayHouse = XRayInterface.xray(house).to(XrayHouse.class);
 		Key key = xRayHouse.getHouseKey(); // aquire the private key
 		house.open(key); // execute the public method
@@ -91,8 +91,8 @@ Assume that we do not want to spy out the correct key, but we want to change the
 For example:
 
 ```Java
-    public List<Furniture> open(House house) throws NoSuchMethodException {
-    	Key key = new Key();
+	public List<Furniture> open(House house) throws NoSuchMethodException {
+		Key key = new Key();
 		XRayHouse xRayHouse = XRayInterface.xray(house).to(XRayHouse.class);
 		xRayHouse.setHouseKey(key);
 		house.open(key);

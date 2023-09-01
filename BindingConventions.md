@@ -17,8 +17,8 @@ We shall shortly sketch how XRayInterface binds the interface to the underlying 
 * Methods of the pattern `Type getXXX();` are bound
   * to the method of same signature, if existing
   * to a newly synthesized getter of a field with name `XXX` of type `Type`
-* Methods of the pattern `Type new<Type>(...)` are bound
-  * to the static method of same signature, if existing
+* Methods of the pattern `Type newType(...)` are bound
+  * to the static method with name newType of same signature, if existing
   * to a constructor of `Type` with matching signature
 * all other methods are bound to
   * to the method of same signature, if existing
