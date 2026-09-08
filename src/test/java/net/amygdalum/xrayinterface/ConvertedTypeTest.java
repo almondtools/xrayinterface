@@ -7,8 +7,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConvertedTypeTest {
 
@@ -35,10 +36,12 @@ public class ConvertedTypeTest {
 		assertThat(type.matching(Other.class), sameInstance(type));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void testMatchingIllegal() throws Exception {
-		ConvertedType type = converted(Other.class, Example.class);
-		assertThat(type.matching(Example.class), equalTo(fixed(Example.class)));
+		assertThrows(IllegalArgumentException.class, () -> {
+			ConvertedType type = converted(Other.class, Example.class);
+			assertThat(type.matching(Example.class), equalTo(fixed(Example.class)));
+		});
 	}
 	
 	@Test

@@ -5,11 +5,12 @@ import static net.amygdalum.xrayinterface.FixedType.VOID;
 import static net.amygdalum.xrayinterface.FixedType.fixed;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public class InvocationResolverInstanceTest {
@@ -50,34 +51,44 @@ public class InvocationResolverInstanceTest {
 		assertThat(resolver.createSetterInvocator("convertible", converted(ConvertibleObject.class, ConvertibleInterface.class)), notNullValue());
 	}
 
-	@Test(expected = NoSuchFieldException.class)
+	@Test
 	public void testCreateMethodInvocatorGetterInvocatorFails() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createGetterInvocator("a", fixed(boolean.class));
+		assertThrows(NoSuchFieldException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createGetterInvocator("a", fixed(boolean.class));
+		});
 	}
 
-	@Test(expected = NoSuchFieldException.class)
+	@Test
 	public void testCreateMethodInvocatorSetterInvocatorFails() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createSetterInvocator("a", fixed(boolean.class));
+		assertThrows(NoSuchFieldException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createSetterInvocator("a", fixed(boolean.class));
+		});
 	}
 
-	@Test(expected = NoSuchFieldException.class)
+	@Test
 	public void testFindFieldNonExisting() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("a", fixed(boolean.class)), notNullValue());
+		assertThrows(NoSuchFieldException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			assertThat(resolver.findField("a", fixed(boolean.class)), notNullValue());
+		});
 	}
 
-	@Test(expected = NoSuchFieldException.class)
+	@Test
 	public void testFindSuperFieldWronglyTyped() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("s", fixed(boolean.class)), notNullValue());
+		assertThrows(NoSuchFieldException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			assertThat(resolver.findField("s", fixed(boolean.class)), notNullValue());
+		});
 	}
 
-	@Test(expected = NoSuchFieldException.class)
+	@Test
 	public void testFindFieldWronglyTyped() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("b", fixed(String.class)), notNullValue());
+		assertThrows(NoSuchFieldException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			assertThat(resolver.findField("b", fixed(String.class)), notNullValue());
+		});
 	}
 
 	@Test
@@ -99,64 +110,84 @@ public class InvocationResolverInstanceTest {
 		assertThat(resolver.createMethodInvocator("methodb", converted(ConvertibleObject.class, ConvertibleInterface.class), types(), types()), notNullValue());
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorNonExisting() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methodz", fixed(String.class), types(), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methodz", fixed(String.class), types(), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorWronglyReturnType() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methoda", fixed(String.class), types(), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methoda", fixed(String.class), types(), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorWronglySignature() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methodb", VOID, types(), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methodb", VOID, types(), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorWronglyTyped() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methodb", VOID, types(int.class), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methodb", VOID, types(int.class), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorWronglyExceptionTyped() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methodb", VOID, types(String.class), types(Exception.class));
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methodb", VOID, types(String.class), types(Exception.class));
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorWronglyExceptionTypedInSuperclass() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		resolver.createMethodInvocator("methode", fixed(String.class), types(String.class), types(IOException.class));
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+			resolver.createMethodInvocator("methode", fixed(String.class), types(String.class), types(IOException.class));
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorNotConvertibleArguments() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		resolver.createMethodInvocator("methoda", VOID, types(ConvertibleInterface.class), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+			resolver.createMethodInvocator("methoda", VOID, types(ConvertibleInterface.class), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorNotConvertibleResult() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		resolver.createMethodInvocator("methodb", fixed(ConvertibleInterface.class), types(), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+			resolver.createMethodInvocator("methodb", fixed(ConvertibleInterface.class), types(), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorFailedConvertibleArguments() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		resolver.createMethodInvocator("methoda", VOID, types(converted(ConvertibleInterface.class, ConvertibleInterface.class)), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+			resolver.createMethodInvocator("methoda", VOID, types(converted(ConvertibleInterface.class, ConvertibleInterface.class)), types());
+		});
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testCreateMethodInvocatorMethodInvocatorFailedConvertibleResult() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
-		resolver.createMethodInvocator("methodb", converted(ConvertibleInterface.class, ConvertibleInterface.class), types(), types());
+		assertThrows(NoSuchMethodException.class, () -> {
+			InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+			resolver.createMethodInvocator("methodb", converted(ConvertibleInterface.class, ConvertibleInterface.class), types(), types());
+		});
 	}
 
 	private Type[] types(Object... types) {

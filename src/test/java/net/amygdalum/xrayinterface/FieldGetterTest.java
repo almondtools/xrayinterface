@@ -4,21 +4,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public class FieldGetterTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -55,9 +56,11 @@ public class FieldGetterTest {
 		assertThat((String) result, equalTo("world"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetFieldWithFailingSignatureOne() throws Throwable {
-		new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), new Object[] { 1 });
+		assertThrows(IllegalArgumentException.class, () -> {
+			new FieldGetter("field", getterFor(WithField.class, "field")).invoke(new WithField(), new Object[] { 1 });
+		});
 	}
 
 	@Test
@@ -81,9 +84,11 @@ public class FieldGetterTest {
 		assertThat(result, nullValue());
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testConvertedGetFieldContravariant() throws Throwable {
-		new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class).invoke(new WithConvertedField(), new Object[0]);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class).invoke(new WithConvertedField(), new Object[0]);
+		});
 	}
 
 	@Test
@@ -93,9 +98,11 @@ public class FieldGetterTest {
 		assertThat(((ConvertedContravariantInterface) result).getContent().toString(), equalTo("world"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConvertedGetFieldWithFailingSignatureOne() throws Throwable {
-		new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(new WithConvertedField(), new Object[] { 1 });
+		assertThrows(IllegalArgumentException.class, () -> {
+			new FieldGetter("field", getterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(new WithConvertedField(), new Object[] { 1 });
+		});
 	}
 
 	@Test

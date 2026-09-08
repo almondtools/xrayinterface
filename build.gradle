@@ -1,0 +1,135 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'signing'
+    id("com.github.ben-manes.versions") version "0.52.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+}
+
+apply plugin: "com.github.ben-manes.versions"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    compileOnly 'org.hamcrest:hamcrest:3.0'
+
+    testImplementation 'org.hamcrest:hamcrest:3.0'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.3'
+    testImplementation('net.amygdalum:hamcrest-extensions:0.1.21') {
+        exclude group: 'org.hamcrest', module: 'hamcrest-library'
+    }
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+group = 'net.amygdalum'
+version = '0.3.6-SNAPSHOT'
+description = 'net.amygdalum:xrayinterface'
+
+task javadocJar(type: Jar) {
+    dependsOn javadoc
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'Automatic-Module-Name': 'net.amygdalum.xrayinterface'
+        )
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+            artifact sourcesJar
+            artifact javadocJar
+
+	        pom {
+		        name = 'XRayInterface'
+		        description = 'An application to get controlled access to private fields and methods of Java classes'
+		        url = 'http://xrayinterface.amygdalum.net/'
+	            licenses {
+	                license {
+			            name = 'GNU LESSER GENERAL PUBLIC LICENSE (LGPL)'
+	        		    url = 'http://www.gnu.org/licenses/lgpl.txt'
+	                }
+	            }
+	            developers {
+	                developer {
+			            id = 'amygdalum'
+	        		    name = 'Stefan Mandel'
+			            email = 'mandelst@gmail.com'
+	                }
+	            }
+	            scm {
+					connection = 'scm:git:git@github.com:almondtools/xrayinterface.git'
+					developerConnection = 'scm:git:git@github.com:almondtools/xrayinterface.git'
+					url = 'git@github.com:almondtools/xrayinterface.git'
+	            }
+	        }
+        }
+    }
+	repositories {
+        maven {
+            name = 'sonatype'
+            credentials(PasswordCredentials)
+        }
+    }
+}
+
+signing {
+	sign publishing.publications.mavenJava
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.deprecation = true
+    options.compilerArgs << '-Xlint:all'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    options.addBooleanOption('Xdoclint:none', true)
+}

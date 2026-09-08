@@ -6,8 +6,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MatchTypeTest {
 
@@ -40,10 +41,12 @@ public class MatchTypeTest {
 		assertThat(type.matching(Other.class), equalTo(converted(Other.class, Example.class)));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void testMatchingIllegal() throws Exception {
-		MatchType type = new MatchType("Other", Example.class);
-		type.matching(Object.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			MatchType type = new MatchType("Other", Example.class);
+			type.matching(Object.class);
+		});
 	}
 	
 	private static class Example {

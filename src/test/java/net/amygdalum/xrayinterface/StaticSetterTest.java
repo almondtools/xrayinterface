@@ -4,20 +4,21 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class StaticSetterTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -61,40 +62,53 @@ public class StaticSetterTest {
 		assertThat(WithField.field, equalTo("hello"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignatureNone() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[0]);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[0]);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, (Object[]) null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, (Object[]) null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignature2() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { "hello", "world" });
+		assertThrows(IllegalArgumentException.class, () -> {
+			new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { "hello", "world" });
+		});
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void testSetFieldWithoutMatchingType() throws Throwable {
-		new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { Integer.valueOf(1) });
+		assertThrows(ClassCastException.class, () -> {
+			new StaticSetter("field", setterFor(WithField.class, "field")).invoke(null, new Object[] { Integer.valueOf(1) });
+		});
 	}
 
 	@Test
-	public void testSetStaticFinalField() throws Throwable {
-		Object result = new StaticSetter("RUNTIME", setterFor(WithStaticFinalField.class, "RUNTIME")).invoke(null, new Object[] { "hello" });
-		assertThat(result, nullValue());
-		assertThat(WithStaticFinalField.RUNTIME, equalTo("hello"));
+	public void testSetStaticFinalFieldIsUnsupported() throws Throwable {
+		assertThrows(IllegalAccessException.class, () -> {
+			setterFor(WithStaticFinalField.class, "RUNTIME");
+		});
 	}
 
 	@Test
-	public void testSetStaticFinalFieldCompileTime() throws Throwable {
-		Object voidresult = new StaticSetter("COMPILETIME", setterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[] { "hello" });
-		assertThat(voidresult, nullValue());
-		assertThat(WithStaticFinalField.COMPILETIME, equalTo("ABC"));// paradox in source code, effect of inlining (see byte code of this line)
-		Object result = new StaticGetter("COMPILETIME", getterFor(WithStaticFinalField.class, "COMPILETIME")).invoke(null, new Object[0]);
-		assertThat(result, equalTo((Object) "hello"));
+	public void testSetStaticFinalFieldCompileTimeIsUnsupported() throws Throwable {
+		assertThrows(IllegalAccessException.class, () -> {
+			setterFor(WithStaticFinalField.class, "COMPILETIME");
+		});
+	}
+
+	@Test
+	public void testGetStaticFinalField() throws Throwable {
+		Object result = new StaticGetter("RUNTIME", getterFor(WithStaticFinalField.class, "RUNTIME")).invoke(null, new Object[0]);
+
+		assertThat(result, equalTo((Object) "ABC"));
 	}
 
 	@Test
@@ -112,7 +126,9 @@ public class StaticSetterTest {
 
 	private static class WithStaticFinalField {
 
+		@SuppressWarnings("unused")
 		static final String RUNTIME = "ABC".toString();
+		@SuppressWarnings("unused")
 		static final String COMPILETIME = "ABC";
 	}
 

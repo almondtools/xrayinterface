@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -13,15 +14,15 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public class ConstructorInvokerTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -74,14 +75,18 @@ public class ConstructorInvokerTest {
 		assertThat(resultOnConstructor, instanceOf(WithImplicitConstructor.class));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testInvokeWithNPEConstructor() throws Throwable {
-		Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(null, new Object[] { Boolean.FALSE });
+		assertThrows(NullPointerException.class, () -> {
+			Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(null, new Object[] { Boolean.FALSE });
+		});
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void testInvokeWithIOConstructor() throws Throwable {
-		Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(null, new Object[] { Boolean.TRUE });
+		assertThrows(IOException.class, () -> {
+			Object result = new ConstructorInvoker(constructorOf(WithConstructor.class, boolean.class)).invoke(null, new Object[] { Boolean.TRUE });
+		});
 	}
 
 	@Test

@@ -7,7 +7,7 @@ import static net.amygdalum.xrayinterface.BindingQualifier.CONSTRUCTOR;
 import static net.amygdalum.xrayinterface.BindingQualifier.GET;
 import static net.amygdalum.xrayinterface.BindingQualifier.METHOD;
 import static net.amygdalum.xrayinterface.BindingQualifier.SET;
-import static net.amygdalum.xrayinterface.FinalUtil.ensureNonFinal;
+import static net.amygdalum.xrayinterface.FinalUtil.ensureWritable;
 import static net.amygdalum.xrayinterface.FixedType.fixed;
 import static net.amygdalum.xrayinterface.SignatureUtil.computeFieldNames;
 import static net.amygdalum.xrayinterface.SignatureUtil.fieldSignature;
@@ -279,7 +279,7 @@ public class InvocationResolver {
 
 	protected MethodInvocationHandler createSetterInvocator(String name, Type param) throws NoSuchFieldException {
 		Field field = findField(name, param);
-		ensureNonFinal(field);
+		ensureWritable(field);
 		return createSetterInvocator(field, param.convertedType());
 	}
 

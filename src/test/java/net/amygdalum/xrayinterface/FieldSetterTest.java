@@ -3,20 +3,21 @@ package net.amygdalum.xrayinterface;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class FieldSetterTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -61,28 +62,36 @@ public class FieldSetterTest {
 		assertThat(object.field, equalTo("hello"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignatureNone() throws Throwable {
-		WithField object = new WithField();
-		new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[0]);
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithField object = new WithField();
+			new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[0]);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		WithField object = new WithField();
-		new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, (Object[]) null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithField object = new WithField();
+			new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, (Object[]) null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetFieldFailingSignature2() throws Throwable {
-		WithField object = new WithField();
-		new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[] { "hello", "world" });
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithField object = new WithField();
+			new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[] { "hello", "world" });
+		});
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void testSetFieldWithoutMatchingType() throws Throwable {
-		WithField object = new WithField();
-		new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[] { Integer.valueOf(1) });
+		assertThrows(ClassCastException.class, () -> {
+			WithField object = new WithField();
+			new FieldSetter("field", setterFor(WithField.class, "field")).invoke(object, new Object[] { Integer.valueOf(1) });
+		});
 	}
 
 	@Test
@@ -119,28 +128,36 @@ public class FieldSetterTest {
 		assertThat(object.field, nullValue());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConvertedSetFieldFailingSignatureNone() throws Throwable {
-		WithConvertedField object = new WithConvertedField();
-		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[0]);
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithConvertedField object = new WithConvertedField();
+			new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[0]);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConvertedSetFieldFailingSignatureNull() throws Throwable {
-		WithConvertedField object = new WithConvertedField();
-		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, (Object[]) null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithConvertedField object = new WithConvertedField();
+			new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, (Object[]) null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConvertedSetFieldFailingSignature2() throws Throwable {
-		WithConvertedField object = new WithConvertedField();
-		new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[] { proxy("hello"), "world" });
+		assertThrows(IllegalArgumentException.class, () -> {
+			WithConvertedField object = new WithConvertedField();
+			new FieldSetter("field", setterFor(WithConvertedField.class, "field"), ConvertedInterface.class).invoke(object, new Object[] { proxy("hello"), "world" });
+		});
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void testConvertedSetFieldWithoutMatchingType() throws Throwable {
-		WithConvertedField object = new WithConvertedField();
-		new FieldSetter("other", setterFor(WithConvertedField.class, "other"), String.class).invoke(object, new Object[] { Integer.valueOf(1) });
+		assertThrows(ClassCastException.class, () -> {
+			WithConvertedField object = new WithConvertedField();
+			new FieldSetter("other", setterFor(WithConvertedField.class, "other"), String.class).invoke(object, new Object[] { Integer.valueOf(1) });
+		});
 	}
 
 	@Test

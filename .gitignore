@@ -2,3 +2,11 @@
 /.settings/
 /.classpath
 /.project
+/bin/
+
+.gradle
+build
+/out/
+
+.claude
+CLAUDE.md

@@ -4,20 +4,21 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class StaticGetterTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -54,9 +55,11 @@ public class StaticGetterTest {
 		assertThat((String) result, equalTo("world"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetFieldWithFailingSignatureOne() throws Throwable {
-		new StaticGetter("field", getterFor(WithField.class, "field")).invoke(null, new Object[] { 1 });
+		assertThrows(IllegalArgumentException.class, () -> {
+			new StaticGetter("field", getterFor(WithField.class, "field")).invoke(null, new Object[] { 1 });
+		});
 	}
 
 	@Test
@@ -72,10 +75,12 @@ public class StaticGetterTest {
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testConvertedGetFieldContravariant() throws Throwable {
-		StaticGetter staticMethod = new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class);
-		staticMethod.invoke(null);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			StaticGetter staticMethod = new StaticGetter("field", getterFor(WithConvertedField.class, "field"), ContravariantInterface.class);
+			staticMethod.invoke(null);
+		});
 	}
 
 	@Test

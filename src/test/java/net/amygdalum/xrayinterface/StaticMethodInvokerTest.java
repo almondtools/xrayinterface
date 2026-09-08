@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -12,15 +13,15 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public class StaticMethodInvokerTest {
 
 	private Lookup lookup;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		this.lookup = MethodHandles.lookup();
 	}
@@ -60,19 +61,25 @@ public class StaticMethodInvokerTest {
 		assertThat((String) invoke, equalTo("1"));
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void testInvokeFailingSignature() throws Throwable {
-		new StaticMethodInvoker("staticMethod", methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(null, new Object[] { "1" });
+		assertThrows(ClassCastException.class, () -> {
+			new StaticMethodInvoker("staticMethod", methodOf(WithStaticMethod.class,"staticMethod", int.class)).invoke(null, new Object[] { "1" });
+		});
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void testInvokeCheckedException() throws Throwable {
-		new StaticMethodInvoker("staticException", methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 2 });
+		assertThrows(IOException.class, () -> {
+			new StaticMethodInvoker("staticException", methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 2 });
+		});
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testInvokeUncheckedException() throws Throwable {
-		new StaticMethodInvoker("staticException", methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 1 });
+		assertThrows(NullPointerException.class, () -> {
+			new StaticMethodInvoker("staticException", methodOf(WithStaticMethod.class,"staticException", int.class)).invoke(null, new Object[] { 1 });
+		});
 	}
 
 	@Test

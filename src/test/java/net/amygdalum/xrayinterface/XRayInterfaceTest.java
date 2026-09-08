@@ -10,18 +10,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class XRayInterfaceTest {
 
 	private LockedObject object;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		object = new LockedObject();
 	}
@@ -163,14 +164,18 @@ public class XRayInterfaceTest {
 		}
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testMissingExceptionSignature() throws Exception {
-		XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithMissingExceptions.class);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithMissingExceptions.class);
+		});
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testFalseExceptionSignature() throws Exception {
-		XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithFalseExceptions.class);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			XRayInterface.xray(new LockedObjectWithDeclaredExceptions()).to(UnlockedWithFalseExceptions.class);
+		});
 	}
 
 	@Test

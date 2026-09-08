@@ -1,20 +1,27 @@
-package net.amygdalum.xrayinterface.examples.house;
+package net.amygdalum.xrayinterface.examples.house.hamcrest;
 
+import static java.util.Arrays.asList;
 import static net.amygdalum.xrayinterface.XRayMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import net.amygdalum.xrayinterface.IsEquivalent;
+import net.amygdalum.xrayinterface.examples.house.Furniture;
+import net.amygdalum.xrayinterface.examples.house.House;
+import net.amygdalum.xrayinterface.examples.house.Key;
+import net.amygdalum.xrayinterface.examples.house.Safe;
 import net.amygdalum.xrayinterface.XRayInterface;
 
 public class HouseTest {
@@ -22,7 +29,7 @@ public class HouseTest {
 	private Key key;
 	private House house;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		key = new Key();
 		house = new House(key);
@@ -38,9 +45,11 @@ public class HouseTest {
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testBrute() throws Exception {
-		house.listFurniture();
+		assertThrows(UnsupportedOperationException.class, () -> {
+			house.listFurniture();
+		});
 	}
 
 	@Test
@@ -81,6 +90,40 @@ public class HouseTest {
 			.withHouseKey(key)
 			.withLocked(true)
 			.withFurniture(hasSize(1)));
+	}
+
+	@Test
+	public void testMatchingHouseList() throws Exception {
+		House openHouse = new House(key);
+		openHouse.add(new Safe());
+		openHouse.add(new Safe());
+		List<House> houses = asList(house, openHouse);
+
+		assertThat(houses, contains(
+			XRayHouseMatcher.matchesHouse()
+				.withHouseKey(key)
+				.withLocked(true)
+				.withFurniture(hasSize(1)),
+			XRayHouseMatcher.matchesHouse()
+				.withHouseKey(key)
+				.withLocked(false)
+				.withFurniture(hasSize(2))));
+	}
+
+	@Test
+	public void testMatchingHouseListInAnyOrder() throws Exception {
+		House openHouse = new House(key);
+		openHouse.add(new Safe());
+		openHouse.add(new Safe());
+		List<House> houses = asList(house, openHouse);
+
+		assertThat(houses, containsInAnyOrder(
+			XRayHouseMatcher.matchesHouse()
+				.withLocked(false)
+				.withFurniture(hasSize(2)),
+			XRayHouseMatcher.matchesHouse()
+				.withLocked(true)
+				.withFurniture(hasSize(1))));
 	}
 
 	@Test

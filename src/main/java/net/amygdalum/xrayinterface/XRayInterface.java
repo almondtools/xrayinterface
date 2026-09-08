@@ -2,8 +2,7 @@ package net.amygdalum.xrayinterface;
 
 import static java.util.stream.Collectors.toList;
 
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.Constructor;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -197,16 +196,16 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 				Class<?> currentClass = todo.remove(0);
 				done.add(currentClass);
 				for (Method method : currentClass.getDeclaredMethods()) {
-					if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
+					if (!isBindable(method)) {
 						continue;
 					}
 					if (!methods.containsKey(method)) {
 						methods.put(method, findInvocationHandler(method));
 					}
-					for (Class<?> superInterfaceClazz : currentClass.getInterfaces()) {
-						if (!done.contains(superInterfaceClazz)) {
-							todo.add(superInterfaceClazz);
-						}
+				}
+				for (Class<?> superInterfaceClazz : currentClass.getInterfaces()) {
+					if (!done.contains(superInterfaceClazz)) {
+						todo.add(superInterfaceClazz);
 					}
 				}
 			}
@@ -219,17 +218,32 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 	}
 
 	/**
+	 * determines whether the given interface method has to be bound to the wrapped object. Only abstract methods
+	 * are bound - default methods, static methods and the synthetic methods the compiler generates for lambdas in
+	 * default methods provide their own implementation.
+	 *
+	 * @param method the method to check
+	 * @return true if the method needs a binding
+	 */
+	private static boolean isBindable(Method method) {
+		return Modifier.isAbstract(method.getModifiers());
+	}
+
+	/**
 	 * collects all methods of the given interface conflicting with the wrapped object
-	 * 
+	 *
 	 * @param interfaceClazz the interface to check on conflicts
 	 * @return a list of methods conflicting
 	 */
 	public List<Method> unMappable(Class<?> interfaceClazz) {
 		List<Method> conflicts = new LinkedList<Method>();
 		for (Method method : interfaceClazz.getDeclaredMethods()) {
+			if (!isBindable(method)) {
+				continue;
+			}
 			try {
 				findInvocationHandler(method);
-			} catch (NoSuchFieldException | NoSuchMethodException e) {
+			} catch (NoSuchFieldException | NoSuchMethodException | ReflectionFailedException e) {
 				conflicts.add(method);
 			}
 		}
@@ -242,15 +256,11 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 		if (handler != null) {
 			return handler.invoke(object, args);
 		} else if (method.isDefault()) {
-			Constructor<Lookup> constructor = Lookup.class
-                .getDeclaredConstructor(Class.class);
-            constructor.setAccessible(true);
-            Lookup lookup = constructor.newInstance(method.getDeclaringClass());
-			return lookup
-                .in(method.getDeclaringClass())
-                .unreflectSpecial(method, method.getDeclaringClass())
-                .bindTo(proxy)
-                .invokeWithArguments(args);
+			Class<?> declaringClass = method.getDeclaringClass();
+			return MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup())
+				.unreflectSpecial(method, declaringClass)
+				.bindTo(proxy)
+				.invokeWithArguments(args);
 		} else {
 			return method.invoke(this, args);
 		}

@@ -5,8 +5,9 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FixedTypeTest {
 
@@ -32,9 +33,11 @@ public class FixedTypeTest {
 		assertThat(type.matching(Example.class), sameInstance(type));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void testMatchingIllegal() throws Exception {
-		fixed(Example.class).matching(Other.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			fixed(Example.class).matching(Other.class);
+		});
 	}
 	
 	private static class Example {

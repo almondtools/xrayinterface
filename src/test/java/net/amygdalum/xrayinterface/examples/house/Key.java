@@ -18,7 +18,7 @@ public class Key {
 
 	@Override
 	public int hashCode() {
-		return new Double(id).hashCode();
+		return Double.hashCode(id);
 	}
 
 	@Override

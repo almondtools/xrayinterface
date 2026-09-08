@@ -1,14 +1,23 @@
-package net.amygdalum.xrayinterface.examples.innerclass;
+package net.amygdalum.xrayinterface.examples.innerclass.hamcrest;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import java.util.List;
+
+import org.hamcrest.Matcher;
+import org.junit.jupiter.api.Test;
 
 import net.amygdalum.xrayinterface.Convert;
 import net.amygdalum.xrayinterface.InterfaceMismatchException;
+import net.amygdalum.xrayinterface.IsEquivalent;
 import net.amygdalum.xrayinterface.XRayInterface;
+import net.amygdalum.xrayinterface.examples.innerclass.ExampleObject;
 
 public class ExampleObjectTest {
 
@@ -59,16 +68,20 @@ public class ExampleObjectTest {
 		}, ""), is(true));
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testInnerStaticMappingExceptionOnResult() throws Exception {
-		ExampleObject exampleObject = new ExampleObject("state");
-		XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionResult.class);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			ExampleObject exampleObject = new ExampleObject("state");
+			XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionResult.class);
+		});
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testInnerStaticMappingExceptionOnParams() throws Exception {
-		ExampleObject exampleObject = new ExampleObject("state");
-		XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionParam.class);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			ExampleObject exampleObject = new ExampleObject("state");
+			XRayInterface.xray(exampleObject).to(UnlockedExampleExceptionParam.class);
+		});
 	}
 
 	@Test
@@ -108,6 +121,40 @@ public class ExampleObjectTest {
 
 		});
 		assertThat(unlockedExampleObject.getFieldInnerStatic().getState(), equalTo("newState"));
+	}
+
+	@Test
+	public void testMatchingExampleObject() throws Exception {
+		assertThat(new ExampleObject("state"), UnlockedExampleObjectMatcher.matchesExampleObject()
+			.withOuterState("state"));
+	}
+
+	@Test
+	public void testMatchingExampleObjectList() throws Exception {
+		List<ExampleObject> exampleObjects = asList(new ExampleObject("first"), new ExampleObject("second"));
+
+		assertThat(exampleObjects, contains(
+			UnlockedExampleObjectMatcher.matchesExampleObject().withOuterState("first"),
+			UnlockedExampleObjectMatcher.matchesExampleObject().withOuterState("second")));
+	}
+
+	@Test
+	public void testMatchingExampleObjectListInAnyOrder() throws Exception {
+		List<ExampleObject> exampleObjects = asList(new ExampleObject("first"), new ExampleObject("second"));
+
+		assertThat(exampleObjects, containsInAnyOrder(
+			UnlockedExampleObjectMatcher.matchesExampleObject().withOuterState("second"),
+			UnlockedExampleObjectMatcher.matchesExampleObject().withOuterState("first")));
+	}
+
+	interface UnlockedExampleObjectMatcher extends Matcher<ExampleObject> {
+
+		UnlockedExampleObjectMatcher withOuterState(String outerState);
+
+		static UnlockedExampleObjectMatcher matchesExampleObject() {
+			return IsEquivalent.equivalentTo(UnlockedExampleObjectMatcher.class);
+		}
+
 	}
 
 	interface UnlockedExampleObject {

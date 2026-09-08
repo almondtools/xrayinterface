@@ -4,7 +4,9 @@ package net.amygdalum.xrayinterface;
 
 public class LockedObjectWithPrivateConstructor {
 
-	private static final String DEFAULT = null;
+	private static String DEFAULT = null;
+	@SuppressWarnings("unused")
+	private static final String CONSTANT = "constant".toString();
 	private String myField;
 	
 	private LockedObjectWithPrivateConstructor() {

@@ -9,8 +9,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class StaticPropertyTest {
 
@@ -19,7 +19,7 @@ public class StaticPropertyTest {
 	
 	private static String field;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		Lookup lookup = MethodHandles.lookup();
 		Field field = StaticPropertyTest.class.getDeclaredField("field");

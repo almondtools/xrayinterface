@@ -7,10 +7,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class XRayInterfaceStaticTest {
@@ -68,9 +70,11 @@ public class XRayInterfaceStaticTest {
 		assertThat(unlocked.get(), equalTo("default"));
 	}
 
-	@Test(expected = InterfaceMismatchException.class)
+	@Test
 	public void testWrongSignature() throws Exception {
-		XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedNotMatchingObject.class);
+		assertThrows(InterfaceMismatchException.class, () -> {
+			XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedNotMatchingObject.class);
+		});
 	}
 
 	@Test
@@ -186,6 +190,39 @@ public class XRayInterfaceStaticTest {
 			.collect(toSet()), containsInAnyOrder("DEFAULT"));
 	}
 	
+	@Test
+	public void testStaticFinalGetter() throws Exception {
+		UnlockedStaticFinalGetterObject unlocked = XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedStaticFinalGetterObject.class);
+
+		assertThat(unlocked.getCONSTANT(), equalTo("constant"));
+	}
+
+	@Test
+	public void testStaticFinalSetterIsUnsupported() throws Exception {
+		ReflectionFailedException exception = assertThrows(ReflectionFailedException.class, () -> {
+			XRayInterface.xray(LockedObjectWithPrivateConstructor.class).to(UnlockedStaticFinalObject.class);
+		});
+
+		assertThat(exception.getMessage(), containsString("cannot write static final field String CONSTANT"));
+	}
+
+	@Test
+	public void testStaticFinalSetterIsNotXrayable() throws Exception {
+		assertThat(LockedObjectWithPrivateConstructor.class, not(canBeTreatedAs(UnlockedStaticFinalObject.class)));
+	}
+
+	public static interface UnlockedStaticFinalObject {
+
+		public void setCONSTANT(String value);
+
+	}
+
+	public static interface UnlockedStaticFinalGetterObject {
+
+		public String getCONSTANT();
+
+	}
+
 	public static interface UnlockedObject {
 
 		public LockedObjectWithPrivateConstructor newLockedObjectWithPrivateConstructor();

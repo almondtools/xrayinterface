@@ -8,13 +8,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.hamcrest.core.IsNot;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import java.util.function.Consumer;
 
 public class IsEquivalentTest {
 
@@ -51,6 +54,30 @@ public class IsEquivalentTest {
 		assertThat(new EqTest("str", 42), equivalentTo(EqTestMatcher.class)
 			.withI(CoreMatchers.<Integer> both(greaterThan(41)).and(lessThan(43)))
 			.withStr(containsString("st")));
+	}
+
+	@Test
+	public void testConsumerBasedProperties() throws Exception {
+		assertThat(new EqTest("str", 42), equivalentTo(EqTestConsumerValue.class)
+			.withI(i -> assertEquals(42, i.intValue()))
+			.withStr(str -> assertEquals("str", str)));
+	}
+
+	@Test
+	public void testConsumerBasedPropertiesMismatching() throws Exception {
+		assertThat(new EqTest("str", 42), not(equivalentTo(EqTestConsumerValue.class)
+			.withStr(str -> assertEquals("other", str))));
+	}
+
+	@Test
+	public void testConsumerBasedPropertiesDescription() throws Exception {
+		EqTestConsumerValue matcher = equivalentTo(EqTestConsumerValue.class)
+			.withStr(str -> assertEquals("other", str));
+		Description description = new StringDescription();
+
+		matcher.describeTo(description);
+
+		assertThat(description.toString(), equalTo("with properties <Str=satisfying the given consumer>"));
 	}
 
 	@Test
@@ -136,6 +163,12 @@ public class IsEquivalentTest {
 		EqTestValue withStr(String str);
 
 		EqTestValue withI(int i);
+	}
+
+	interface EqTestConsumerValue extends Matcher<EqTest> {
+		EqTestConsumerValue withStr(Consumer<String> str);
+
+		EqTestConsumerValue withI(Consumer<Integer> i);
 	}
 
 	interface EqTestMatcher extends Matcher<EqTest> {

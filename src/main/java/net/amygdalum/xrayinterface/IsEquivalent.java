@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -12,7 +13,7 @@ import org.hamcrest.StringDescription;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 
-public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
+public class IsEquivalent<S, T> extends BaseMatcher<S> {
 
 	private static final String WITH = "with";
 
@@ -24,7 +25,32 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		this.properties = new LinkedHashMap<String, Object>();
 	}
 
+	/**
+	 * creates a {@link Matcher} for the properties described by the given interface. The interface must extend
+	 * {@link Matcher} and provide builder methods of the pattern <code>Iface withXXX(Type value)</code>.
+	 *
+	 * @param interfaceClazz the builder interface (extending {@link Matcher})
+	 * @param <S> the type to match
+	 * @param <T> the builder interface type
+	 * @return a matcher to use with hamcrest assertions
+	 */
 	public static <S, T extends Matcher<S>> T equivalentTo(Class<T> interfaceClazz) {
+		return new XRayInterfaceWith<S, T>(new IsEquivalent<S, T>(interfaceClazz)).to(interfaceClazz);
+	}
+
+	/**
+	 * creates a {@link Consumer} for the properties described by the given interface. The interface must extend
+	 * {@link Consumer} and provide builder methods of the pattern <code>Iface withXXX(Type value)</code>. The
+	 * resulting consumer throws an {@link AssertionError} for non matching items, hence it can be used as
+	 * requirement of assertj methods like <code>satisfies</code>, <code>satisfiesExactly</code> or
+	 * <code>satisfiesExactlyInAnyOrder</code>.
+	 *
+	 * @param interfaceClazz the builder interface (extending {@link Consumer})
+	 * @param <S> the type to match
+	 * @param <T> the builder interface type
+	 * @return a consumer to use with assertj assertions
+	 */
+	public static <S, T extends Consumer<S>> T isEquivalent(Class<T> interfaceClazz) {
 		return new XRayInterfaceWith<S, T>(new IsEquivalent<S, T>(interfaceClazz)).to(interfaceClazz);
 	}
 
@@ -61,6 +87,17 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		return true;
 	}
 
+	public void accept(Object item) {
+		if (!matches(item)) {
+			Description description = new StringDescription();
+			description.appendText("expected object ");
+			describeTo(description);
+			description.appendText("\nbut found object ");
+			describeMismatch(item, description);
+			throw new AssertionError(description.toString());
+		}
+	}
+
 	private Object propertyValueFor(Object item, String name) throws NoSuchFieldException {
 		Class<?> currentClass = item.getClass();
 		while (currentClass != null) {
@@ -95,6 +132,10 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 
 	@Override
 	public void describeMismatch(Object item, Description description) {
+		if (item == null) {
+			description.appendText("null");
+			return;
+		}
 		Map<String, Object> mismatchedProperties = new LinkedHashMap<>();
 		for (Map.Entry<String,Object> entry : properties.entrySet()) {
 			String property = entry.getKey();
@@ -123,7 +164,7 @@ public class IsEquivalent<S, T extends Matcher<S>> extends BaseMatcher<S> {
 		return super.equals(obj);
 	}
 
-	private static final class XRayInterfaceWith<S, T extends Matcher<S>> extends XRayInterface {
+	private static final class XRayInterfaceWith<S, T> extends XRayInterface {
 		private XRayInterfaceWith(Object object) {
 			super(object);
 		}

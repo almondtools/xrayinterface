@@ -1,14 +1,16 @@
-package net.amygdalum.xrayinterface.examples.tree;
+package net.amygdalum.xrayinterface.examples.tree.hamcrest;
 
-import static net.amygdalum.xrayinterface.examples.tree.TreeNodeTest.TreeNodeMatcher.treeNodeWithId;
+import static net.amygdalum.xrayinterface.examples.tree.hamcrest.TreeNodeTest.TreeNodeMatcher.treeNodeWithId;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.amygdalum.xrayinterface.IsEquivalent;
+import net.amygdalum.xrayinterface.examples.tree.TreeNode;
 
 public class TreeNodeTest {
 
@@ -62,6 +64,15 @@ public class TreeNodeTest {
 						treeNodeWithId("b"),
 						treeNodeWithId("c")),
 				treeNodeWithId("d")));
+	}
+
+	@Test
+	public void testXRayInAnyOrder() throws Exception {
+		TreeNode root = createTree();
+
+		assertThat(root.getChildren(), containsInAnyOrder(
+			treeNodeWithId("d"),
+			treeNodeWithId("a")));
 	}
 
 	private TreeNode createTree() {
