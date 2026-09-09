@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
@@ -139,6 +140,11 @@ public class ConverterTest {
 		public boolean equals(Object obj) {
 			return ((SimpleObject) obj).string.equals(string);
 		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(string);
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -156,6 +162,11 @@ public class ConverterTest {
 		@Override
 		public boolean equals(Object obj) {
 			return ((SimpleOtherObject) obj).string.equals(string);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(string);
 		}
 	}
 

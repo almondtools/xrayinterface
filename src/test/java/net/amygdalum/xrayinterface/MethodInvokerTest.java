@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -230,6 +231,11 @@ public class MethodInvokerTest {
 		@Override
 		public boolean equals(Object obj) {
 			return ((SimpleObject) obj).string.equals(string);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(string);
 		}
 	}
 

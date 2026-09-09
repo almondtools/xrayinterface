@@ -2,6 +2,7 @@ package net.amygdalum.xrayinterface.examples.tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public 	class TreeNode {
 	private String id;
@@ -35,6 +36,11 @@ public 	class TreeNode {
 		TreeNode that = (TreeNode) obj;
 		return this.id.equals(that.id)
 			&& this.children.equals(that.children);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, children);
 	}
 
 }

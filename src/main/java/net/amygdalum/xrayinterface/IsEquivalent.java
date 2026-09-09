@@ -1,7 +1,9 @@
 package net.amygdalum.xrayinterface;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -60,7 +62,7 @@ public class IsEquivalent<S, T> extends BaseMatcher<S> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public Object invoke(Object object, Object... args) throws Throwable {
-				((IsEquivalent<S, T>) object).properties.put(name, args[0]);
+				((IsEquivalent<S, T>) object).properties.put(name, adapt(args[0]));
 				return new XRayInterfaceWith<S, T>(IsEquivalent.this).to(interfaceClazz);
 			}
 		};
@@ -115,6 +117,43 @@ public class IsEquivalent<S, T> extends BaseMatcher<S> {
 		throw new NoSuchFieldException(name);
 	}
 
+	/**
+	 * adapts a property value to the matching model of this matcher. Values that already are {@link Matcher}s or
+	 * plain values are used as they are, {@link Consumer}s are wrapped into a matcher succeeding if the consumer
+	 * does not throw an {@link AssertionError}. Builder interfaces created by {@link #equivalentTo(Class)} or
+	 * {@link #isEquivalent(Class)} are unwrapped to their backing {@link IsEquivalent}, so that nested
+	 * expectations can describe themselves.
+	 *
+	 * @param value the property value to adapt
+	 * @return the adapted property value
+	 */
+	private static Object adapt(Object value) {
+		IsEquivalent<?, ?> equivalent = unwrapEquivalent(value);
+		if (equivalent != null) {
+			return equivalent;
+		} else if (value instanceof Matcher<?>) {
+			return value;
+		} else if (value instanceof Consumer<?>) {
+			return new SatisfiesConsumer((Consumer<?>) value);
+		} else {
+			return value;
+		}
+	}
+
+	private static IsEquivalent<?, ?> unwrapEquivalent(Object value) {
+		if (value == null || !Proxy.isProxyClass(value.getClass())) {
+			return null;
+		}
+		InvocationHandler handler = Proxy.getInvocationHandler(value);
+		if (handler instanceof XRayInterface) {
+			Object object = ((XRayInterface) handler).getObject();
+			if (object instanceof IsEquivalent<?, ?>) {
+				return (IsEquivalent<?, ?>) object;
+			}
+		}
+		return null;
+	}
+
 	private Matcher<?> matcherFor(Object value) {
 		if (value instanceof Matcher<?>) {
 			return (Matcher<?>) value;
@@ -162,6 +201,47 @@ public class IsEquivalent<S, T> extends BaseMatcher<S> {
 	@Override
 	public boolean equals(Object obj) {
 		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	private static final class SatisfiesConsumer extends BaseMatcher<Object> {
+
+		private Consumer<Object> consumer;
+
+		@SuppressWarnings("unchecked")
+		public SatisfiesConsumer(Consumer<?> consumer) {
+			this.consumer = (Consumer<Object>) consumer;
+		}
+
+		@Override
+		public boolean matches(Object item) {
+			try {
+				consumer.accept(item);
+				return true;
+			} catch (AssertionError e) {
+				return false;
+			}
+		}
+
+		@Override
+		public void describeTo(Description description) {
+			description.appendText("satisfying the given consumer");
+		}
+
+		@Override
+		public void describeMismatch(Object item, Description description) {
+			try {
+				consumer.accept(item);
+				description.appendText("satisfying the given consumer");
+			} catch (AssertionError e) {
+				description.appendText(e.getMessage());
+			}
+		}
+
 	}
 
 	private static final class XRayInterfaceWith<S, T> extends XRayInterface {

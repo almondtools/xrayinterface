@@ -209,7 +209,7 @@ public class XRayInterface extends InvocationResolver implements InvocationHandl
 					}
 				}
 			}
-			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] {interfaceClass}, this);
+			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[] {interfaceClass}, this);
 		} catch (NoSuchFieldException e) {
 			throw new InterfaceMismatchException("cannot resolve property " + e.getMessage() + " on " + getType());
 		} catch (NoSuchMethodException e) {
